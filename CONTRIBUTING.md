@@ -13,11 +13,13 @@
 
 ```sh
 cd client
+nvm use
 npm i
 ```
 
 ```sh
 cd server
+nvm use
 npm i
 ```
 
@@ -28,3 +30,7 @@ Para arrancar tanto el cliente como el servidor se puede escribir el siguiente c
 ```sh
 npm start
 ```
+
+## Google Maps API
+
+https://storage.googleapis.com/js-samples/master/public/index.html

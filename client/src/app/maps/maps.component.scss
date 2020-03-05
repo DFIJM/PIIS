@@ -1,0 +1,12 @@
+:host {
+  display: block;
+  position: relative;
+
+  > div {
+    height: 100vh;
+  }
+}
+
+#map {
+  height: 100%;
+}
