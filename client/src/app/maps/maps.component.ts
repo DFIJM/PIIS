@@ -73,7 +73,20 @@ export class MapsComponent implements AfterViewInit {
 
   zoneListener(zone) {
     google.maps.event.addListener(zone, 'click', e => {
-      console.log(e);
+      this.http
+        .post('api/zone/info', this.zoneToData(zone))
+        .toPromise()
+        .then((info: any) => {
+          console.log(info);
+          for (const i of info) {
+            const lat = i.venue.location.lat;
+            const lng = i.venue.location.lng;
+            new google.maps.Marker({
+              position: { lat, lng },
+              map: this.map
+            }).setMap(this.map);
+          }
+        });
     });
   }
 
@@ -84,11 +97,7 @@ export class MapsComponent implements AfterViewInit {
       .then((zones: any[]) => {
         this.zones = zones;
         for (const data of this.zones) {
-          const zone = new google.maps.Circle({
-            center: new google.maps.LatLng(data.lat, data.lng),
-            map: this.map,
-            radius: data.radius
-          });
+          const zone = this.dataToZone(data);
           zone.setOptions({
             clickable: true
           });
@@ -99,33 +108,24 @@ export class MapsComponent implements AfterViewInit {
   }
 
   drawingListener() {
-    google.maps.event.addListener(
-      this.drawingManager,
-      'circlecomplete',
-      zone => {
-        const data = {
-          name: null,
-          lat: zone.center.lat(),
-          lng: zone.center.lng(),
-          radius: zone.radius
-        };
-        if (this.checkAllOverlap(data)) {
-          const name = prompt('Nombre de la zona');
-          if (!name) {
-            this.snackBar.open('Nombre obligatorio');
-          } else {
-            data.name = name;
-            this.zones.push(data);
-            this.zoneListener(zone);
-            this.http.post('api/zone/set', data).toPromise();
-            return;
-          }
+    google.maps.event.addListener(this.drawingManager, 'circlecomplete', zone => {
+      const data = this.zoneToData(zone);
+      if (this.checkAllOverlap(data)) {
+        const name = prompt('Nombre de la zona');
+        if (!name) {
+          this.snackBar.open('Nombre obligatorio');
         } else {
-          this.snackBar.open('Superposición no permitida');
+          data.name = name;
+          this.zones.push(data);
+          this.zoneListener(zone);
+          this.http.post('api/zone/set', data).toPromise();
+          return;
         }
-        zone.setMap(null);
+      } else {
+        this.snackBar.open('Superposición no permitida');
       }
-    );
+      zone.setMap(null);
+    });
   }
 
   overlap(circle1, circle2) {
@@ -144,5 +144,22 @@ export class MapsComponent implements AfterViewInit {
       }
     }
     return true;
+  }
+
+  zoneToData(zone) {
+    return {
+      name: null,
+      lat: zone.center.lat(),
+      lng: zone.center.lng(),
+      radius: zone.radius
+    };
+  }
+
+  dataToZone(data) {
+    return new google.maps.Circle({
+      center: new google.maps.LatLng(data.lat, data.lng),
+      map: this.map,
+      radius: data.radius
+    });
   }
 }
