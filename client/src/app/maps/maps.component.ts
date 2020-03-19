@@ -1,6 +1,5 @@
 import { Component, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { getDistance } from 'geolib';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
@@ -17,7 +16,7 @@ export class MapsComponent implements AfterViewInit {
   drawingManager: google.maps.drawing.DrawingManager;
 
   mapOptions: google.maps.MapOptions = {
-    zoom: 9,
+    zoom: 7,
     fullscreenControl: false,
     streetViewControl: false,
     mapTypeControl: false
@@ -47,20 +46,20 @@ export class MapsComponent implements AfterViewInit {
 
   defaultLocation() {
     this.map.setCenter({
-      lat: 37.9836841,
-      lng: -1.1247620999999999
+      lat: 40.4183083,
+      lng: -3.70275
     });
   }
 
   setDrawer() {
     this.drawingManager = new google.maps.drawing.DrawingManager({
-      drawingMode: google.maps.drawing.OverlayType.CIRCLE,
+      drawingMode: google.maps.drawing.OverlayType.RECTANGLE,
       drawingControl: true,
       drawingControlOptions: {
         position: google.maps.ControlPosition.TOP_CENTER,
-        drawingModes: [google.maps.drawing.OverlayType.CIRCLE]
+        drawingModes: [google.maps.drawing.OverlayType.RECTANGLE]
       },
-      circleOptions: {
+      rectangleOptions: {
         clickable: true
       }
     });
@@ -98,6 +97,7 @@ export class MapsComponent implements AfterViewInit {
         this.zones = zones;
         for (const data of this.zones) {
           const zone = this.dataToZone(data);
+          console.log(zone);
           zone.setOptions({
             clickable: true
           });
@@ -108,58 +108,42 @@ export class MapsComponent implements AfterViewInit {
   }
 
   drawingListener() {
-    google.maps.event.addListener(this.drawingManager, 'circlecomplete', zone => {
+    google.maps.event.addListener(this.drawingManager, 'rectanglecomplete', zone => {
       const data = this.zoneToData(zone);
-      if (this.checkAllOverlap(data)) {
-        const name = prompt('Nombre de la zona');
-        if (!name) {
-          this.snackBar.open('Nombre obligatorio');
-        } else {
-          data.name = name;
-          this.zones.push(data);
-          this.zoneListener(zone);
-          this.http.post('api/zone/set', data).toPromise();
-          return;
-        }
+      const name = prompt('Nombre de la zona');
+      if (!name) {
+        this.snackBar.open('Nombre obligatorio');
+        zone.setMap(null);
       } else {
-        this.snackBar.open('Superposición no permitida');
+        data.name = name;
+        this.zones.push(data);
+        this.zoneListener(zone);
+        this.http.post('api/zone/set', data).toPromise();
       }
-      zone.setMap(null);
     });
   }
 
-  overlap(circle1, circle2) {
-    const distance = getDistance(
-      { latitude: circle1.lat, longitude: circle1.lng },
-      { latitude: circle2.lat, longitude: circle2.lng }
-    );
-    // Si la distancia entre los centros es menor que la suma de los radios
-    return distance < circle1.radius + circle2.radius;
-  }
-
-  checkAllOverlap(zoneToCheck): boolean {
-    for (const zone of this.zones) {
-      if (this.overlap(zone, zoneToCheck)) {
-        return false;
-      }
-    }
-    return true;
-  }
-
   zoneToData(zone) {
+    const bounds = zone.getBounds();
+    const ne = {
+      lat: bounds.getNorthEast().lat(),
+      lng: bounds.getNorthEast().lng()
+    };
+    const sw = {
+      lat: bounds.getSouthWest().lat(),
+      lng: bounds.getSouthWest().lng()
+    };
     return {
       name: null,
-      lat: zone.center.lat(),
-      lng: zone.center.lng(),
-      radius: zone.radius
+      // Desde el centro superior, como las agujas del reloj: ne, se, sw, nw
+      bounds: [ne, { lat: ne.lat, lng: sw.lng }, sw, { lat: sw.lat, lng: ne.lng }]
     };
   }
 
   dataToZone(data) {
-    return new google.maps.Circle({
-      center: new google.maps.LatLng(data.lat, data.lng),
+    return new google.maps.Rectangle({
       map: this.map,
-      radius: data.radius
+      bounds: new google.maps.LatLngBounds(data.bounds[2], data.bounds[0])
     });
   }
 }

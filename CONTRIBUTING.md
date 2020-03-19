@@ -34,3 +34,10 @@ npm start
 ## Google Maps API
 
 https://storage.googleapis.com/js-samples/master/public/index.html
+
+## MongoDB
+
+URL: lorkiano.ddns.net:27017
+USER: piis20
+PASS: Uc@m.2020
+DBNAME: piis

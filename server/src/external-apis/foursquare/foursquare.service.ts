@@ -1,6 +1,7 @@
 import { Injectable, HttpService } from '@nestjs/common';
 import { Zone } from '../../api/zone/zone';
 import { map } from 'rxjs/internal/operators/map';
+import { rectangleToCircle } from '../utils/rectangleToCircle';
 
 @Injectable()
 export class FoursquareService {
@@ -11,18 +12,18 @@ export class FoursquareService {
   private readonly CLIENT_ID = 'YWBCRB3LHLJEXOWRZQUSHGV1TFSEXSWOKM3AJDVJAGXOC5HR';
   private readonly CLIENT_SECRET = 'HGCTXK23LWGRWLXL0AWO1LIN0AWU0HN24SOGRAK3BN2YGOZC';
   private readonly VERSION = 20180604;
-  private readonly LIMIT = 10000;
+  private readonly LIMIT = 100;
 
   get(zone: Zone) {
-    console.info(`GET: ${this.API} : ${zone.lat},${zone.lng} : ${zone.radius}`);
+    let circle = rectangleToCircle(zone);
     return this.http
       .get(this.API, {
         params: {
           client_id: this.CLIENT_ID,
           client_secret: this.CLIENT_SECRET,
           v: this.VERSION,
-          ll: `${zone.lat},${zone.lng}`,
-          radius: zone.radius,
+          ll: `${circle.center.lat},${circle.center.lng}`,
+          radius: circle.radius,
           limit: this.LIMIT
         }
       })
