@@ -8,7 +8,6 @@ export class FoursquareService {
   constructor(private http: HttpService) {}
 
   private readonly API = 'https://api.foursquare.com/v2/venues/explore';
-
   private readonly CLIENT_ID = 'YWBCRB3LHLJEXOWRZQUSHGV1TFSEXSWOKM3AJDVJAGXOC5HR';
   private readonly CLIENT_SECRET = 'HGCTXK23LWGRWLXL0AWO1LIN0AWU0HN24SOGRAK3BN2YGOZC';
   private readonly VERSION = 20180604;
