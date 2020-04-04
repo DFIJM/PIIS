@@ -1,6 +1,10 @@
 import { Component, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatSelectionList } from '@angular/material/list';
+import { SelectComponent } from './select/select.component';
+import { MatDialog } from '@angular/material/dialog';
+import { InfoComponent } from './info/info.component';
 
 @Component({
   selector: 'piis-maps',
@@ -8,15 +12,60 @@ import { MatSnackBar } from '@angular/material/snack-bar';
   styleUrls: ['./maps.component.scss']
 })
 export class MapsComponent implements AfterViewInit {
+  constructor(private http: HttpClient, private snackBar: MatSnackBar, private dialog: MatDialog) {}
+
+  apis = [
+    {
+      name: 'FourSquare',
+      type: 'CIRCLE',
+      icon: 'foursquare.png'
+    },
+    {
+      name: 'OpenStreetMap',
+      type: 'RECTANGLE',
+      icon: 'openstreetmap.png'
+    },
+    {
+      name: 'Twitter',
+      type: 'RECTANGLE',
+      icon: 'twitter.png'
+    }
+  ];
+
+  negocios: any[] = [
+    {
+      icon: 'https://ss3.4sqi.net/img/categories_v2/food/default_bg_32.png',
+      name: 'Restaurantes',
+      count: 1074
+    },
+    {
+      icon: 'https://ss3.4sqi.net/img/categories_v2/parks_outdoors/default_bg_32.png',
+      name: 'Parques',
+      count: 945
+    },
+    {
+      icon: 'https://ss3.4sqi.net/img/categories_v2/shops/default_bg_32.png',
+      name: 'Tiendas',
+      count: 670
+    },
+    {
+      icon: 'https://ss3.4sqi.net/img/categories_v2/arts_entertainment/default_bg_32.png',
+      name: 'Cines',
+      count: 13
+    }
+  ];
+
+  selectedApis = [];
   zones: any[] = [];
-  constructor(private http: HttpClient, private snackBar: MatSnackBar) {}
 
   @ViewChild('mapContainer', { static: false }) gmap: ElementRef;
+  @ViewChild('apiList', { static: false }) apiList: MatSelectionList;
+
   map: google.maps.Map;
   drawingManager: google.maps.drawing.DrawingManager;
 
   mapOptions: google.maps.MapOptions = {
-    zoom: 7,
+    zoom: 11,
     fullscreenControl: false,
     streetViewControl: false,
     mapTypeControl: false
@@ -26,6 +75,20 @@ export class MapsComponent implements AfterViewInit {
     this.map = new google.maps.Map(this.gmap.nativeElement, this.mapOptions);
     this.setGeolocalization();
     this.setDrawer();
+  }
+
+  apiChange(selection) {
+    for (let api of this.apis) {
+      if (!selection.option.value) {
+        this.changeDrawer();
+      } else if (api.name === selection.option.value) {
+        if (api.type.toUpperCase() !== this.drawingManager.getDrawingMode()?.toUpperCase()) {
+          this.changeDrawer(api.type.toUpperCase());
+          this.selectedApis = [api.name];
+          break;
+        }
+      }
+    }
   }
 
   setGeolocalization() {
@@ -51,15 +114,34 @@ export class MapsComponent implements AfterViewInit {
     });
   }
 
+  changeDrawer(type?) {
+    if (type) {
+      this.drawingManager.setOptions({
+        drawingControlOptions: {
+          position: google.maps.ControlPosition.TOP_CENTER,
+          drawingModes: [google.maps.drawing.OverlayType[type]]
+        }
+      });
+      this.drawingManager.setDrawingMode(google.maps.drawing.OverlayType[type]);
+    } else {
+      this.drawingManager.setOptions({
+        drawingControlOptions: {
+          position: google.maps.ControlPosition.TOP_CENTER,
+          drawingModes: []
+        }
+      });
+      this.drawingManager.setDrawingMode(null);
+    }
+  }
+
   setDrawer() {
     this.drawingManager = new google.maps.drawing.DrawingManager({
-      drawingMode: google.maps.drawing.OverlayType.RECTANGLE,
+      drawingMode: null,
       drawingControl: true,
-      drawingControlOptions: {
-        position: google.maps.ControlPosition.TOP_CENTER,
-        drawingModes: [google.maps.drawing.OverlayType.RECTANGLE]
-      },
       rectangleOptions: {
+        clickable: true
+      },
+      circleOptions: {
         clickable: true
       }
     });
@@ -67,13 +149,15 @@ export class MapsComponent implements AfterViewInit {
 
     this.loadData();
 
-    this.drawingListener();
+    this.changeDrawer();
+    google.maps.event.addListener(this.drawingManager, 'rectanglecomplete', this.drawingListener());
+    google.maps.event.addListener(this.drawingManager, 'circlecomplete', this.drawingListener());
   }
 
-  zoneListener(zone) {
-    google.maps.event.addListener(zone, 'click', e => {
+  zoneListener(drawing) {
+    google.maps.event.addListener(drawing, 'click', e => {
       this.http
-        .post('api/zone/info', this.zoneToData(zone))
+        .post('api/zone/info', this.parseDrawing(drawing))
         .toPromise()
         .then((info: any) => {
           console.log(info);
@@ -95,55 +179,96 @@ export class MapsComponent implements AfterViewInit {
       .toPromise()
       .then((zones: any[]) => {
         this.zones = zones;
-        for (const data of this.zones) {
-          const zone = this.dataToZone(data);
-          console.log(zone);
-          zone.setOptions({
-            clickable: true
-          });
-          this.zoneListener(zone);
-          zone.setMap(this.map);
+        for (const zone of this.zones) {
+          for (const drawing of zone.drawings) {
+            this.drawZone(drawing);
+          }
         }
       });
   }
 
   drawingListener() {
-    google.maps.event.addListener(this.drawingManager, 'rectanglecomplete', zone => {
-      const data = this.zoneToData(zone);
+    return drawing => {
+      const data = this.parseDrawing(drawing);
       const name = prompt('Nombre de la zona');
       if (!name) {
         this.snackBar.open('Nombre obligatorio');
-        zone.setMap(null);
+        drawing.setMap(null);
       } else {
-        data.name = name;
-        this.zones.push(data);
-        this.zoneListener(zone);
-        this.http.post('api/zone/set', data).toPromise();
+        // this.zones.push(data);
+        this.zoneListener(drawing);
+        console.log(data);
+        // this.http.post('api/zone/set', data).toPromise();
       }
-    });
-  }
-
-  zoneToData(zone) {
-    const bounds = zone.getBounds();
-    const ne = {
-      lat: bounds.getNorthEast().lat(),
-      lng: bounds.getNorthEast().lng()
-    };
-    const sw = {
-      lat: bounds.getSouthWest().lat(),
-      lng: bounds.getSouthWest().lng()
-    };
-    return {
-      name: null,
-      // Desde el centro superior, como las agujas del reloj: ne, se, sw, nw
-      bounds: [ne, { lat: ne.lat, lng: sw.lng }, sw, { lat: sw.lat, lng: ne.lng }]
     };
   }
 
-  dataToZone(data) {
-    return new google.maps.Rectangle({
-      map: this.map,
-      bounds: new google.maps.LatLngBounds(data.bounds[2], data.bounds[0])
-    });
+  parseDrawing(drawing) {
+    if (drawing instanceof google.maps.Rectangle) {
+      const bounds = drawing.getBounds();
+      const ne = {
+        lat: bounds.getNorthEast().lat(),
+        lng: bounds.getNorthEast().lng()
+      };
+      const sw = {
+        lat: bounds.getSouthWest().lat(),
+        lng: bounds.getSouthWest().lng()
+      };
+      return {
+        // Desde el centro superior, como las agujas del reloj: ne, se, sw, nw
+        bounds: [ne, { lat: ne.lat, lng: sw.lng }, sw, { lat: sw.lat, lng: ne.lng }]
+      };
+    } else {
+      return {
+        center: { lat: drawing.center.lat(), lng: drawing.center.lng() },
+        radius: drawing.radius
+      };
+    }
   }
+
+  drawZone(drawing) {
+    let item;
+    if (drawing.type.toUpperCase() === 'RECTANGLE') {
+      item = new google.maps.Rectangle({
+        map: this.map,
+        bounds: new google.maps.LatLngBounds(drawing.options.bounds[2], drawing.options.bounds[0])
+      });
+    } else {
+      item = new google.maps.Circle({
+        map: this.map,
+        center: new google.maps.LatLng(drawing.options.center.lat, drawing.options.center.lng),
+        radius: drawing.options.radius
+      });
+    }
+    item.setOptions({
+      clickable: true
+    });
+    this.zoneListener(item);
+    item.setMap(this.map);
+  }
+
+  playOrStop(zone) {
+    console.log(zone);
+    zone.playing = !zone.playing;
+  }
+
+  fabMenuSelect($event) {
+    $event === 1 ? this.history() : this.compare();
+  }
+
+  async history() {
+    let selectedZones = await this.dialog
+      .open(SelectComponent, { data: { zones: this.zones } })
+      .afterClosed()
+      .toPromise();
+
+    if (selectedZones) {
+      await this.dialog
+        .open(InfoComponent, { data: { selectedZones } })
+        .afterClosed()
+        .toPromise();
+    }
+  }
+
+  compare() {}
 }

@@ -1,5 +1,5 @@
 import { BrowserModule } from '@angular/platform-browser';
-import { NgModule, APP_INITIALIZER } from '@angular/core';
+import { NgModule, APP_INITIALIZER, LOCALE_ID } from '@angular/core';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -8,18 +8,14 @@ import { AppInitializer } from './app.initializer';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MAT_SNACK_BAR_DEFAULT_OPTIONS } from '@angular/material/snack-bar';
+import { MatFabMenuModule } from '@angular-material-extensions/fab-menu';
 
 @NgModule({
   declarations: [AppComponent],
-  imports: [
-    BrowserModule,
-    AppRoutingModule,
-    FlexLayoutModule,
-    MapsModule,
-    BrowserAnimationsModule
-  ],
+  imports: [BrowserModule, AppRoutingModule, FlexLayoutModule, MapsModule, BrowserAnimationsModule, MatFabMenuModule],
   providers: [
     AppInitializer,
+    { provide: LOCALE_ID, useValue: 'es-ES' },
     {
       provide: MAT_SNACK_BAR_DEFAULT_OPTIONS,
       useValue: {

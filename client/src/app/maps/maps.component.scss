@@ -2,11 +2,86 @@
   display: block;
   position: relative;
 
-  > div {
+  > .base-layout {
     height: 100vh;
   }
 }
 
+.title {
+  font-size: 30px;
+  font-weight: bold;
+  align-items: center;
+  justify-content: center;
+}
+
+.mat-list-item.zone ::ng-deep .mat-list-item-content {
+  padding-right: 5px;
+}
+
+.mat-icon-button {
+  color: #757575;
+}
+
 #map {
   height: 100%;
+}
+
+img.icon {
+  width: 20px;
+  margin-right: 10px;
+}
+
+.zone-list,
+.commerce-list {
+  height: calc((100vh - 345px) / 2);
+  overflow: auto;
+  padding-top: 0;
+}
+
+.commerce-list .category-icon {
+  width: 25px;
+  margin-right: 10px;
+}
+
+.sidebar {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  border-radius: 20px;
+  background: white;
+  width: 250px;
+  height: calc(100vh - 40px);
+}
+
+.badge {
+  border: 1px solid #b9b9b9;
+  border-radius: 2px;
+  padding: 0 3px;
+  position: absolute;
+  right: 16px;
+}
+
+.category-icon,
+.category-name {
+  vertical-align: middle;
+  display: inline-block;
+}
+
+mat-fab-menu {
+  position: fixed;
+  bottom: 122px;
+  right: 2px;
+
+  ::ng-deep {
+    > div > div {
+      margin-bottom: 0 !important;
+
+      > button {
+        margin-bottom: 0 !important;
+      }
+    }
+    mat-icon {
+      transform: none !important;
+    }
+  }
 }
