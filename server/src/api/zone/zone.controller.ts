@@ -44,6 +44,6 @@ export class ZoneController {
 
   @Post('twitter/stop')
   twitterStop(@Body() zone: Zone) {
-    return this.twitter.play(zone);
+    return this.twitter.stop(zone);
   }
 }
