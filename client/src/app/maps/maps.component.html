@@ -36,6 +36,7 @@
       <div fxFlex>{{zone.name}}</div>
       <button fxFlex="40px"
               mat-icon-button
+              (click)="resumen(zone)"
               [matTooltip]="'Resumen informativo'">
         <mat-icon>info</mat-icon>
       </button>
