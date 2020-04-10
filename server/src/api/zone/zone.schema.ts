@@ -1,11 +1,26 @@
 import * as mongoose from 'mongoose';
 
-const BoundSchema = new mongoose.Schema({
+const Coordinate = new mongoose.Schema({
   lat: Number,
   lng: Number
 });
 
+const Options = new mongoose.Schema({
+  center: Coordinate,
+  radius: Number,
+
+  bounds: [Coordinate]
+});
+
+const Drawing = new mongoose.Schema({
+  id: Number,
+  type: String,
+  api: String,
+  options: Options
+});
+
 export const ZoneSchema = new mongoose.Schema({
   name: String,
-  bounds: [BoundSchema]
+  playing: Boolean,
+  drawings: [Drawing]
 });

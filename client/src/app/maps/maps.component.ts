@@ -9,7 +9,7 @@ import { InfoComponent } from './info/info.component';
 @Component({
   selector: 'piis-maps',
   templateUrl: './maps.component.html',
-  styleUrls: ['./maps.component.scss']
+  styleUrls: ['./maps.component.scss'],
 })
 export class MapsComponent implements AfterViewInit {
   constructor(private http: HttpClient, private snackBar: MatSnackBar, private dialog: MatDialog) {}
@@ -18,41 +18,41 @@ export class MapsComponent implements AfterViewInit {
     {
       name: 'FourSquare',
       type: 'CIRCLE',
-      icon: 'foursquare.png'
+      icon: 'foursquare.png',
     },
     {
       name: 'OpenStreetMap',
       type: 'RECTANGLE',
-      icon: 'openstreetmap.png'
+      icon: 'openstreetmap.png',
     },
     {
       name: 'Twitter',
       type: 'RECTANGLE',
-      icon: 'twitter.png'
-    }
+      icon: 'twitter.png',
+    },
   ];
 
   negocios: any[] = [
     {
       icon: 'https://ss3.4sqi.net/img/categories_v2/food/default_bg_32.png',
       name: 'Restaurantes',
-      count: 1074
+      count: 1074,
     },
     {
       icon: 'https://ss3.4sqi.net/img/categories_v2/parks_outdoors/default_bg_32.png',
       name: 'Parques',
-      count: 945
+      count: 945,
     },
     {
       icon: 'https://ss3.4sqi.net/img/categories_v2/shops/default_bg_32.png',
       name: 'Tiendas',
-      count: 670
+      count: 670,
     },
     {
       icon: 'https://ss3.4sqi.net/img/categories_v2/arts_entertainment/default_bg_32.png',
       name: 'Cines',
-      count: 13
-    }
+      count: 13,
+    },
   ];
 
   selectedApis = [];
@@ -68,7 +68,7 @@ export class MapsComponent implements AfterViewInit {
     zoom: 11,
     fullscreenControl: false,
     streetViewControl: false,
-    mapTypeControl: false
+    mapTypeControl: false,
   };
 
   ngAfterViewInit() {
@@ -94,10 +94,10 @@ export class MapsComponent implements AfterViewInit {
   setGeolocalization() {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
-        position => {
+        (position) => {
           this.map.setCenter({
             lat: position.coords.latitude,
-            lng: position.coords.longitude
+            lng: position.coords.longitude,
           });
         },
         () => this.defaultLocation()
@@ -110,7 +110,7 @@ export class MapsComponent implements AfterViewInit {
   defaultLocation() {
     this.map.setCenter({
       lat: 40.4183083,
-      lng: -3.70275
+      lng: -3.70275,
     });
   }
 
@@ -119,16 +119,16 @@ export class MapsComponent implements AfterViewInit {
       this.drawingManager.setOptions({
         drawingControlOptions: {
           position: google.maps.ControlPosition.TOP_CENTER,
-          drawingModes: [google.maps.drawing.OverlayType[type]]
-        }
+          drawingModes: [google.maps.drawing.OverlayType[type]],
+        },
       });
       this.drawingManager.setDrawingMode(google.maps.drawing.OverlayType[type]);
     } else {
       this.drawingManager.setOptions({
         drawingControlOptions: {
           position: google.maps.ControlPosition.TOP_CENTER,
-          drawingModes: []
-        }
+          drawingModes: [],
+        },
       });
       this.drawingManager.setDrawingMode(null);
     }
@@ -139,11 +139,11 @@ export class MapsComponent implements AfterViewInit {
       drawingMode: null,
       drawingControl: true,
       rectangleOptions: {
-        clickable: true
+        clickable: true,
       },
       circleOptions: {
-        clickable: true
-      }
+        clickable: true,
+      },
     });
     this.drawingManager.setMap(this.map);
 
@@ -154,19 +154,18 @@ export class MapsComponent implements AfterViewInit {
     google.maps.event.addListener(this.drawingManager, 'circlecomplete', this.drawingListener());
   }
 
-  zoneListener(drawing) {
-    google.maps.event.addListener(drawing, 'click', e => {
+  zoneListener(name, gmapsZone, drawing) {
+    google.maps.event.addListener(gmapsZone, 'click', (e) => {
       this.http
-        .post('api/zone/info', this.parseDrawing(drawing))
+        .post('api/zone/info', { name, drawing })
         .toPromise()
         .then((info: any) => {
-          console.log(info);
           for (const i of info) {
             const lat = i.venue.location.lat;
             const lng = i.venue.location.lng;
             new google.maps.Marker({
               position: { lat, lng },
-              map: this.map
+              map: this.map,
             }).setMap(this.map);
           }
         });
@@ -181,75 +180,131 @@ export class MapsComponent implements AfterViewInit {
         this.zones = zones;
         for (const zone of this.zones) {
           for (const drawing of zone.drawings) {
-            this.drawZone(drawing);
+            this.draw(zone.name, drawing);
           }
         }
       });
   }
 
   drawingListener() {
-    return drawing => {
-      const data = this.parseDrawing(drawing);
+    return (drawing) => {
       const name = prompt('Nombre de la zona');
       if (!name) {
         this.snackBar.open('Nombre obligatorio');
         drawing.setMap(null);
       } else {
-        // this.zones.push(data);
-        this.zoneListener(drawing);
-        console.log(data);
-        // this.http.post('api/zone/set', data).toPromise();
+        let zone = this.parseDrawing(name, drawing);
+        this.http
+          .post('api/zone/create', zone)
+          .toPromise()
+          .then(() => {
+            for (let _drawing of zone.drawings) {
+              this.draw(name, _drawing);
+            }
+            drawing.setMap(null);
+          })
+          .catch(({ error }) => {
+            this.snackBar.open(error.message);
+            drawing.setMap(null);
+          });
       }
     };
   }
 
-  parseDrawing(drawing) {
+  parseDrawing(name, drawing) {
+    let apis = this.selectedApis.map((api: string) => api.toLowerCase());
+    let type;
+    let options;
     if (drawing instanceof google.maps.Rectangle) {
+      type = 'RECTANGLE';
       const bounds = drawing.getBounds();
       const ne = {
         lat: bounds.getNorthEast().lat(),
-        lng: bounds.getNorthEast().lng()
+        lng: bounds.getNorthEast().lng(),
       };
       const sw = {
         lat: bounds.getSouthWest().lat(),
-        lng: bounds.getSouthWest().lng()
+        lng: bounds.getSouthWest().lng(),
       };
-      return {
+      options = {
+        id: null,
         // Desde el centro superior, como las agujas del reloj: ne, se, sw, nw
-        bounds: [ne, { lat: ne.lat, lng: sw.lng }, sw, { lat: sw.lat, lng: ne.lng }]
+        bounds: [ne, { lat: ne.lat, lng: sw.lng }, sw, { lat: sw.lat, lng: ne.lng }],
       };
     } else {
-      return {
+      type = 'CIRCLE';
+      options = {
+        id: null,
         center: { lat: drawing.center.lat(), lng: drawing.center.lng() },
-        radius: drawing.radius
+        radius: drawing.radius,
       };
     }
+    let drawings = [];
+    for (let api of apis) {
+      drawings.push({
+        type,
+        api,
+        options,
+      });
+    }
+    return {
+      name,
+      playing: false,
+      drawings,
+    };
   }
 
-  drawZone(drawing) {
+  draw(name, drawing) {
     let item;
     if (drawing.type.toUpperCase() === 'RECTANGLE') {
       item = new google.maps.Rectangle({
         map: this.map,
-        bounds: new google.maps.LatLngBounds(drawing.options.bounds[2], drawing.options.bounds[0])
+        bounds: new google.maps.LatLngBounds(drawing.options.bounds[2], drawing.options.bounds[0]),
       });
     } else {
       item = new google.maps.Circle({
         map: this.map,
         center: new google.maps.LatLng(drawing.options.center.lat, drawing.options.center.lng),
-        radius: drawing.options.radius
+        radius: drawing.options.radius,
       });
     }
     item.setOptions({
-      clickable: true
+      clickable: true,
     });
-    this.zoneListener(item);
+    this.zoneListener(name, item, drawing);
     item.setMap(this.map);
   }
 
+  resumen(zone) {
+    this.http
+      .post('api/zone/resumen', zone)
+      .toPromise()
+      .then((data) => {
+        this.dialog.open(InfoComponent, { data }).afterClosed().toPromise();
+      })
+      .catch((err) => this.snackBar.open('Error consultando ' + err));
+  }
+
   playOrStop(zone) {
-    console.log(zone);
-    zone.playing = !zone.playing;
+    if (zone.playing) {
+      this.http
+        .post('api/zone/twitter/stop', zone)
+        .toPromise()
+        .then(() => {
+          this.snackBar.open('Recopilación detenida');
+          zone.playing = false;
+        })
+        .catch((err) => this.snackBar.open('La detención ha fallado ' + err));
+    } else {
+      this.http
+        .post('api/zone/twitter/play', zone)
+        .toPromise()
+        .then(() => {
+          this.snackBar.open('Recopilando información...');
+          zone.playing = true;
+        })
+        .catch((err) => this.snackBar.open('La recopilación ha fallado ' + err));
+    }
   }
 
   fabMenuSelect($event) {
@@ -263,10 +318,7 @@ export class MapsComponent implements AfterViewInit {
       .toPromise();
 
     if (selectedZones) {
-      await this.dialog
-        .open(InfoComponent, { data: { selectedZones } })
-        .afterClosed()
-        .toPromise();
+      await this.dialog.open(InfoComponent, { data: { selectedZones } }).afterClosed().toPromise();
     }
   }
 
