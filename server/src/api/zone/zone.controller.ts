@@ -1,4 +1,4 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body, InternalServerErrorException } from '@nestjs/common';
 import { Zone } from './zone';
 import { FoursquareService } from '../../external-apis/foursquare/foursquare.service';
 import { InjectModel } from '@nestjs/mongoose';
@@ -22,9 +22,35 @@ export class ZoneController {
     return this.zoneModel.find().exec();
   }
 
-  @Post('set')
-  set(@Body() zone: Zone) {
-    return new this.zoneModel(zone).save();
+  @Post('create')
+  async create(@Body() zone: Zone) {
+    let existingZone = await this.zoneModel.findOne({ name: zone.name });
+    let drawingsToAdd = [];
+    // Si la zona existe, buscamos si la API se repite, en ese caso ignoramos
+    // No permitimos más de una API por zona. Limitación temporal.
+    if (existingZone) {
+      for (let drawing of zone.drawings) {
+        let exists = false;
+        for (let existingDrawing of existingZone.drawings) {
+          if (existingDrawing.api === drawing.api) {
+            exists = true;
+            break;
+          }
+        }
+        if (!exists) {
+          // Si la API no existe en la base de datos
+          drawingsToAdd.push(drawing);
+        }
+      }
+      if (drawingsToAdd.length) {
+        existingZone.drawings.push(...drawingsToAdd);
+        await existingZone.save();
+      } else {
+        throw new InternalServerErrorException('No se admiten APIs duplicadas con el mismo nombre');
+      }
+    } else {
+      await this.zoneModel.create(zone);
+    }
   }
 
   @Post('info')

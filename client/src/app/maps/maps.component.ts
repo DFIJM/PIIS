@@ -154,13 +154,12 @@ export class MapsComponent implements AfterViewInit {
     google.maps.event.addListener(this.drawingManager, 'circlecomplete', this.drawingListener());
   }
 
-  zoneListener(drawing) {
-    google.maps.event.addListener(drawing, 'click', (e) => {
+  zoneListener(name, gmapsZone, drawing) {
+    google.maps.event.addListener(gmapsZone, 'click', (e) => {
       this.http
-        .post('api/zone/info', this.parseDrawing(drawing))
+        .post('api/zone/info', { name, drawing })
         .toPromise()
         .then((info: any) => {
-          console.log(info);
           for (const i of info) {
             const lat = i.venue.location.lat;
             const lng = i.venue.location.lng;
@@ -181,7 +180,7 @@ export class MapsComponent implements AfterViewInit {
         this.zones = zones;
         for (const zone of this.zones) {
           for (const drawing of zone.drawings) {
-            this.drawZone(drawing);
+            this.draw(zone.name, drawing);
           }
         }
       });
@@ -189,22 +188,35 @@ export class MapsComponent implements AfterViewInit {
 
   drawingListener() {
     return (drawing) => {
-      const data = this.parseDrawing(drawing);
       const name = prompt('Nombre de la zona');
       if (!name) {
         this.snackBar.open('Nombre obligatorio');
         drawing.setMap(null);
       } else {
-        // this.zones.push(data);
-        this.zoneListener(drawing);
-        console.log(data);
-        // this.http.post('api/zone/set', data).toPromise();
+        let zone = this.parseDrawing(name, drawing);
+        this.http
+          .post('api/zone/create', zone)
+          .toPromise()
+          .then(() => {
+            for (let _drawing of zone.drawings) {
+              this.draw(name, _drawing);
+            }
+            drawing.setMap(null);
+          })
+          .catch(({ error }) => {
+            this.snackBar.open(error.message);
+            drawing.setMap(null);
+          });
       }
     };
   }
 
-  parseDrawing(drawing) {
+  parseDrawing(name, drawing) {
+    let apis = this.selectedApis.map((api: string) => api.toLowerCase());
+    let type;
+    let options;
     if (drawing instanceof google.maps.Rectangle) {
+      type = 'RECTANGLE';
       const bounds = drawing.getBounds();
       const ne = {
         lat: bounds.getNorthEast().lat(),
@@ -214,19 +226,35 @@ export class MapsComponent implements AfterViewInit {
         lat: bounds.getSouthWest().lat(),
         lng: bounds.getSouthWest().lng(),
       };
-      return {
+      options = {
+        id: null,
         // Desde el centro superior, como las agujas del reloj: ne, se, sw, nw
         bounds: [ne, { lat: ne.lat, lng: sw.lng }, sw, { lat: sw.lat, lng: ne.lng }],
       };
     } else {
-      return {
+      type = 'CIRCLE';
+      options = {
+        id: null,
         center: { lat: drawing.center.lat(), lng: drawing.center.lng() },
         radius: drawing.radius,
       };
     }
+    let drawings = [];
+    for (let api of apis) {
+      drawings.push({
+        type,
+        api,
+        options,
+      });
+    }
+    return {
+      name,
+      playing: false,
+      drawings,
+    };
   }
 
-  drawZone(drawing) {
+  draw(name, drawing) {
     let item;
     if (drawing.type.toUpperCase() === 'RECTANGLE') {
       item = new google.maps.Rectangle({
@@ -243,7 +271,7 @@ export class MapsComponent implements AfterViewInit {
     item.setOptions({
       clickable: true,
     });
-    this.zoneListener(item);
+    this.zoneListener(name, item, drawing);
     item.setMap(this.map);
   }
 
