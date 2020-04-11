@@ -54,8 +54,8 @@ export class ZoneController {
   }
 
   @Post('info')
-  info(@Body() zone: Zone) {
-    return this.foursquare.get(zone);
+  async info(@Body() { name }) {
+    return this.foursquare.get(await this.zoneModel.findOne({ name }).exec());
   }
 
   @Post('resumen')
