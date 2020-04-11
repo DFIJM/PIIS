@@ -64,7 +64,8 @@ export class TwitterService {
   async info(name: string): Promise<any> {
     // información sobre la zona, a modo de ejemplo: top users, etc.
     // lanzar error si no hay datos
-    return Promise.resolve({ name, top: ['a', 'b', 'c'] });
+    let tweets = await this.tweetModel.find({ zone: name }).exec();
+    return { count: tweets.length, tweets };
   }
 
   private createStreaming(name, bounds) {
