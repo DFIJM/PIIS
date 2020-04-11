@@ -48,22 +48,33 @@
       </button>
     </mat-list-item>
   </mat-nav-list>
-  <mat-divider></mat-divider>
-  <mat-list>
-    <div mat-subheader>Negocios</div>
-  </mat-list>
-  <mat-list class="commerce-list">
-    <mat-list-item *ngFor="let negocio of negocios">
-      <div>
-        <img class="category-icon"
-             [src]="negocio.icon" />
-        <span class="category-name">{{negocio.name}}</span>
-      </div>
-      <div class="badge">
-        {{negocio.count | number}}
-      </div>
-    </mat-list-item>
-  </mat-list>
+  <ng-container *ngIf="categories.length">
+    <mat-divider></mat-divider>
+    <mat-list>
+      <div mat-subheader>Negocios en {{categoriesZone}}</div>
+    </mat-list>
+    <mat-list class="category-list">
+      <mat-list-item *ngFor="let category of categories"
+                     fxLayout="row">
+        <img fxFlex
+             fxGrow="0"
+             fxShrink="0"
+             class="category-icon"
+             [src]="category.icon" />
+        <div fxFlex
+             class="category-name"
+             [matTooltip]="category.name">
+          {{category.name}}
+        </div>
+        <div fxFlex
+             fxGrow="0"
+             fxShrink="1"
+             class="badge">
+          {{category.count | number}}
+        </div>
+      </mat-list-item>
+    </mat-list>
+  </ng-container>
 </div>
 
 <mat-fab-menu [fabButtons]="[{id: 1, icon: 'history'}, {id: 2, icon: 'compare'}]"

@@ -32,28 +32,8 @@ export class MapsComponent implements AfterViewInit {
     },
   ];
 
-  negocios: any[] = [
-    {
-      icon: 'https://ss3.4sqi.net/img/categories_v2/food/default_bg_32.png',
-      name: 'Restaurantes',
-      count: 1074,
-    },
-    {
-      icon: 'https://ss3.4sqi.net/img/categories_v2/parks_outdoors/default_bg_32.png',
-      name: 'Parques',
-      count: 945,
-    },
-    {
-      icon: 'https://ss3.4sqi.net/img/categories_v2/shops/default_bg_32.png',
-      name: 'Tiendas',
-      count: 670,
-    },
-    {
-      icon: 'https://ss3.4sqi.net/img/categories_v2/arts_entertainment/default_bg_32.png',
-      name: 'Cines',
-      count: 13,
-    },
-  ];
+  categoriesZone: string;
+  categories: any[] = [];
 
   selectedApis = [];
   zones: any[] = [];
@@ -154,19 +134,30 @@ export class MapsComponent implements AfterViewInit {
     google.maps.event.addListener(this.drawingManager, 'circlecomplete', this.drawingListener());
   }
 
-  zoneListener(name, gmapsZone, drawing) {
-    google.maps.event.addListener(gmapsZone, 'click', (e) => {
+  zoneListener(name, gmapsZone) {
+    google.maps.event.addListener(gmapsZone, 'click', () => {
       this.http
-        .post('api/zone/info', { name, drawing })
+        .post('api/zone/info', { name })
         .toPromise()
-        .then((info: any) => {
-          for (const i of info) {
-            const lat = i.venue.location.lat;
-            const lng = i.venue.location.lng;
-            new google.maps.Marker({
-              position: { lat, lng },
+        .then(({ geo, categories }: any) => {
+          this.categoriesZone = name;
+          this.categories = categories;
+          for (const info of geo) {
+            const infowindow = new google.maps.InfoWindow({
+              content: `
+                <h1>${info.name}</h1>
+                <p><b>Categoría</b>: ${info.category}</p>
+                <p><b>Dirección</b>: ${info.address}</p>
+              `,
+            });
+            const marker = new google.maps.Marker({
+              position: info.position,
               map: this.map,
-            }).setMap(this.map);
+              animation: google.maps.Animation.DROP,
+              icon: { url: info.icon },
+            });
+            marker.addListener('click', () => infowindow.open(this.map, marker));
+            marker.setMap(this.map);
           }
         });
     });
@@ -271,7 +262,7 @@ export class MapsComponent implements AfterViewInit {
     item.setOptions({
       clickable: true,
     });
-    this.zoneListener(name, item, drawing);
+    this.zoneListener(name, item);
     item.setMap(this.map);
   }
 

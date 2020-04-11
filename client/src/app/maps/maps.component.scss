@@ -32,15 +32,31 @@ img.icon {
 }
 
 .zone-list,
-.commerce-list {
+.category-list {
   height: calc((100vh - 345px) / 2);
   overflow: auto;
   padding-top: 0;
-}
 
-.commerce-list .category-icon {
-  width: 25px;
-  margin-right: 10px;
+  ::ng-deep .mat-list-item-content {
+    width: 100%;
+  }
+
+  .category-icon {
+    width: 25px;
+  }
+
+  .category-name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .category-icon,
+  .category-name {
+    margin-right: 10px;
+    vertical-align: middle;
+    display: inline-block;
+  }
 }
 
 .sidebar {
@@ -57,14 +73,6 @@ img.icon {
   border: 1px solid #b9b9b9;
   border-radius: 2px;
   padding: 0 3px;
-  position: absolute;
-  right: 16px;
-}
-
-.category-icon,
-.category-name {
-  vertical-align: middle;
-  display: inline-block;
 }
 
 mat-fab-menu {
