@@ -45,6 +45,20 @@ export class ZoneController {
       if (drawingsToAdd.length) {
         existingZone.drawings.push(...drawingsToAdd);
         await existingZone.save();
+        for (let drawing of drawingsToAdd) {
+          if (drawing.api === 'twitter') {
+            try {
+              await this.twitter.play(existingZone.name);
+              existingZone.playing = true;
+              await existingZone.save();
+            } catch (err) {
+              console.error(err);
+              existingZone.playing = false;
+              await existingZone.save();
+            }
+            break;
+          }
+        }
       } else {
         throw new InternalServerErrorException('No se admiten APIs duplicadas con el mismo nombre');
       }
@@ -53,23 +67,23 @@ export class ZoneController {
     }
   }
 
-  @Post('info')
-  async info(@Body() { name }) {
-    return this.foursquare.get(await this.zoneModel.findOne({ name }).exec());
-  }
-
-  @Post('resumen')
-  resumen(@Body() zone: Zone) {
-    return this.twitter.info(zone);
-  }
-
   @Post('twitter/play')
-  twitterPlay(@Body() zone: Zone) {
-    return this.twitter.play(zone);
+  twitterPlay(@Body() { name }) {
+    return this.twitter.play(name);
   }
 
   @Post('twitter/stop')
-  twitterStop(@Body() zone: Zone) {
-    return this.twitter.stop(zone);
+  twitterStop(@Body() { name }) {
+    return this.twitter.stop(name);
+  }
+
+  @Post('info')
+  async info(@Body() { name }) {
+    return this.foursquare.get(name);
+  }
+
+  @Post('resumen')
+  resumen(@Body() { name }) {
+    return this.twitter.info(name);
   }
 }

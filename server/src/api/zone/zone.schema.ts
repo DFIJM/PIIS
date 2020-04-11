@@ -13,7 +13,6 @@ const Options = new mongoose.Schema({
 });
 
 const Drawing = new mongoose.Schema({
-  id: Number,
   type: String,
   api: String,
   options: Options

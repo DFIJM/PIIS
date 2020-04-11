@@ -1,9 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import * as Twit from 'twit';
 import { Zone } from '../../api/zone/zone';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
 
 @Injectable()
 export class TwitterService {
+  constructor(
+    @InjectModel('Zone') private zoneModel: Model<Zone>,
+    @InjectModel('Tweet') private tweetModel: Model<any>
+  ) {}
   private readonly TWITTER = new Twit({
     consumer_key: 'eP3QRLvHznF8ai03y2c0U69zO',
     consumer_secret: 'wz59GZvZhdUYjCfRdDrOUmp57NcDRqOxTBoJmx6xdrEuCEhn6r',
@@ -11,53 +17,66 @@ export class TwitterService {
     access_token_secret: 'qNkR88nMd1PJVCTClaimMTMSqQCl31JkNgenqnyWLG2Ww'
   });
 
-  /* get(zone: Zone) {
-    const stream = this.TWITTER.stream('statuses/filter', { locations: '' });
+  private streamingsPlaying = {};
 
-    stream.on('tweet', function(tweet) {
-      console.log('tweet');
-      console.log(tweet);
-    });
-    stream.on('warning', function(warning) {
-      console.log('warning');
-      console.log(warning);
-    });
-    stream.on('disconnect', function(disconnectMessage) {
-      console.log('disconnectMessage');
-      console.log(disconnectMessage);
-    });
-  } */
-
-  init(): void {
-    // Al iniciar el servidor se llamará a esta función para que reanude la recopilación
-    // Deberá consultar todas las zonas que estén "playing=true" y llamar a "play" para cada una
-    // Si da error se deberá poner la zona como "playing=false" y controlar todo error para que el servidor inicie siempre
+  async init(): Promise<void> {
+    let zones = await this.zoneModel.find({ playing: true }).exec();
+    for (let zone of zones) {
+      this.play(zone.name);
+    }
   }
 
-  create(zone: Zone): Promise<void> {
-    // Crear registro en mongodb
-    // Crear identificador único para asignarlo a la zona
-    // Crear stream para escuchar twits
-    // Escuchar twits ("play" por defecto)
-    // actualizar mongodb con el valor de "playing"
-    return Promise.resolve();
+  async play(name: string): Promise<void> {
+    if (this.streamingsPlaying[name]) {
+      return; // Saltamos si ya se está consultando
+    }
+    let zone = await this.zoneModel.findOne({ name });
+    for (let drawing of zone.drawings) {
+      if (drawing.api === 'twitter') {
+        await this.createStreaming(name, drawing.options.bounds);
+        zone.playing = true;
+        zone.save();
+        return;
+      }
+    }
+    // Si llega aquí es que no se ha encontrado un drawing.api de "twitter"
+    throw new Error('Zona asignada a la API de Twitter no encontrada');
   }
 
-  play(zone: Zone): Promise<void> {
-    // escuchar stream
-    // actualizar mongodb con el valor de "playing"
-    return Promise.resolve();
+  async stop(name: string): Promise<void> {
+    if (!this.streamingsPlaying[name]) {
+      return; // Saltamos si no se está consultando
+    }
+    let zone = await this.zoneModel.findOne({ name });
+    for (let drawing of zone.drawings) {
+      if (drawing.api === 'twitter') {
+        this.streamingsPlaying[name].stop();
+        delete this.streamingsPlaying[name];
+        zone.playing = false;
+        zone.save();
+        return;
+      }
+    }
+    // Si llega aquí es que no se ha encontrado un drawing.api de "twitter"
+    throw new Error('Zona asignada a la API de Twitter no encontrada');
   }
 
-  stop(zone: Zone): Promise<void> {
-    // pausar stream
-    // actualizar mongodb con el valor de "playing"
-    return Promise.resolve();
-  }
-
-  info(zone: Zone): Promise<any> {
+  async info(name: string): Promise<any> {
     // información sobre la zona, a modo de ejemplo: top users, etc.
     // lanzar error si no hay datos
-    return Promise.resolve({ top: ['a', 'b', 'c'] });
+    let tweets = await this.tweetModel.find({ zone: name }).exec();
+    return { count: tweets.length, tweets };
+  }
+
+  private createStreaming(name, bounds) {
+    this.streamingsPlaying[name] = this.TWITTER.stream('statuses/filter', { locations: this.boundsToLocation(bounds) });
+    this.streamingsPlaying[name].on('tweet', tweet => {
+      tweet.zone = name;
+      this.tweetModel.create(tweet);
+    });
+  }
+
+  private boundsToLocation(bounds: any[]) {
+    return [bounds[2].lat, bounds[2].lng, bounds[0].lat, bounds[0].lng].map(coord => coord.toString());
   }
 }
