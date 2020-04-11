@@ -33,7 +33,7 @@ npm start
 
 ## Google Maps API
 
-https://storage.googleapis.com/js-samples/master/public/index.html
+<https://storage.googleapis.com/js-samples/master/public/index.html>
 
 ## MongoDB
 
@@ -41,3 +41,12 @@ URL: lorkiano.ddns.net:27017
 USER: piis20
 PASS: Uc@m.2020
 DBNAME: piis
+
+## Subida a producción
+
+Hay que ejecutar el archivo deploy.sh. Solo en sistemas Linux.
+Este archivo se encarga de crear todos los archivos necesarios, empaquetarlos y subirlos al servidor de producción.
+Una vez transferidos, reiniciará el servidor y aplicará los cambios.
+
+Es necesario instalar PM2 en el servidor de producción.
+<https://pm2.keymetrics.io/>
