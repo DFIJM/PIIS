@@ -185,6 +185,16 @@ export class MapsComponent implements AfterViewInit {
         drawing.setMap(null);
       } else {
         let zone = this.parseDrawing(name, drawing);
+        let exists = false;
+        for (let existingZone of this.zones) {
+          if (existingZone.name === zone.name) {
+            exists = true;
+            break;
+          }
+        }
+        if (!exists) {
+          this.zones.push(zone);
+        }
         this.http
           .post('api/zone/create', zone)
           .toPromise()
