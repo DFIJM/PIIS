@@ -6,7 +6,7 @@
                   [(ngModel)]="data.zone1"
                   cdkFocusInitial>
         <mat-option *ngFor="let zone of data.zones"
-                    [value]="zone.id">
+                    [value]="zone.name">
           {{zone.name}}
         </mat-option>
       </mat-select>
@@ -17,7 +17,7 @@
       <mat-select placeholder="Zona 2"
                   [(ngModel)]="data.zone2">
         <mat-option *ngFor="let zone of data.zones"
-                    [value]="zone.id">
+                    [value]="zone.name">
           {{zone.name}}
         </mat-option>
       </mat-select>

@@ -1,10 +1,12 @@
 import { Injectable, HttpService, InternalServerErrorException } from '@nestjs/common';
 import { Zone } from '../../api/zone/zone';
 import { map } from 'rxjs/internal/operators/map';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
 
 @Injectable()
 export class FoursquareService {
-  constructor(private http: HttpService) {}
+  constructor(private http: HttpService, @InjectModel('Zone') private zoneModel: Model<Zone>) {}
 
   private readonly API = 'https://api.foursquare.com/v2/venues/explore';
   private readonly CLIENT_ID = 'YWBCRB3LHLJEXOWRZQUSHGV1TFSEXSWOKM3AJDVJAGXOC5HR';
@@ -12,7 +14,8 @@ export class FoursquareService {
   private readonly VERSION = 20180604;
   private readonly LIMIT = 100;
 
-  get(zone: Zone) {
+  async get(name: string): Promise<any> {
+    let zone = await this.zoneModel.findOne({ name }).exec();
     let data;
     for (let drawing of zone.drawings) {
       if (drawing.api === 'foursquare') {

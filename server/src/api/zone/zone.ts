@@ -11,13 +11,11 @@ interface Drawings {
 }
 
 interface CircleOptions {
-  id: number;
   center: Coordinate;
   radius: number;
 }
 
 interface RectangleOptions {
-  id: number;
   bounds: Coordinate[];
 }
 

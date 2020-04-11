@@ -218,14 +218,12 @@ export class MapsComponent implements AfterViewInit {
         lng: bounds.getSouthWest().lng(),
       };
       options = {
-        id: null,
         // Desde el centro superior, como las agujas del reloj: ne, se, sw, nw
         bounds: [ne, { lat: ne.lat, lng: sw.lng }, sw, { lat: sw.lat, lng: ne.lng }],
       };
     } else {
       type = 'CIRCLE';
       options = {
-        id: null,
         center: { lat: drawing.center.lat(), lng: drawing.center.lng() },
         radius: drawing.radius,
       };
@@ -279,7 +277,7 @@ export class MapsComponent implements AfterViewInit {
   playOrStop(zone) {
     if (zone.playing) {
       this.http
-        .post('api/zone/twitter/stop', zone)
+        .post('api/zone/twitter/stop', { name: zone.name })
         .toPromise()
         .then(() => {
           this.snackBar.open('Recopilación detenida');
@@ -288,7 +286,7 @@ export class MapsComponent implements AfterViewInit {
         .catch((err) => this.snackBar.open('La detención ha fallado ' + err));
     } else {
       this.http
-        .post('api/zone/twitter/play', zone)
+        .post('api/zone/twitter/play', { name: zone.name })
         .toPromise()
         .then(() => {
           this.snackBar.open('Recopilando información...');
