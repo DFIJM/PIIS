@@ -77,13 +77,13 @@ export class ZoneController {
     return this.twitter.stop(name);
   }
 
-  @Post('info')
-  async info(@Body() { name }) {
+  @Post('business')
+  async business(@Body() { name }) {
     return this.foursquare.get(name);
   }
 
-  @Post('resumen')
-  resumen(@Body() { name }) {
-    return this.twitter.info(name);
+  @Post('info')
+  async info(@Body() { name }) {
+    return { business: await this.foursquare.info(name), twitter: await this.twitter.info(name) };
   }
 }

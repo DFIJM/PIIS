@@ -1,6 +1,33 @@
-<h1 mat-dialog-title>Información</h1>
+<h1 mat-dialog-title>Resumen de {{data.name}}</h1>
 <div mat-dialog-content>
-  <p>{{data | json}}</p>
+  <div fxLayout="row">
+    <div fxFlex="200px"
+         fxShrink="0">
+      <table>
+        <tr>
+          <td>Tipos de negocios:</td>
+          <td class="number">{{data.business.categories.length | number}}</td>
+        </tr>
+        <tr>
+          <td>Número de negocios:</td>
+          <td class="number">{{data.business.count | number}}</td>
+        </tr>
+      </table>
+    </div>
+    <div fxFlex="200px"
+         fxGrow="1"
+         fxShrink="0"
+         class="twitter">
+      <img src="assets/twitter.png" />
+      Tweets recogidos: <span class="number">{{data.twitter.count | number}}</span>
+    </div>
+  </div>
+  <ag-grid-angular style="width: 500px; height: 500px;"
+                   class="ag-theme-alpine"
+                   [rowData]="data.business.categories"
+                   [columnDefs]="columnDefs"
+                   [frameworkComponents]="frameworkComponents">
+  </ag-grid-angular>
 </div>
 <div mat-dialog-actions
      style="text-align: right;">
