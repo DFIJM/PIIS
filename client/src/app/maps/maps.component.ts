@@ -137,24 +137,24 @@ export class MapsComponent implements AfterViewInit {
   zoneListener(name, gmapsZone) {
     google.maps.event.addListener(gmapsZone, 'click', () => {
       this.http
-        .post('api/zone/info', { name })
+        .post('api/zone/business', { name })
         .toPromise()
         .then(({ geo, categories }: any) => {
           this.categoriesZone = name;
           this.categories = categories;
-          for (const info of geo) {
+          for (const g of geo) {
             const infowindow = new google.maps.InfoWindow({
               content: `
-                <h1>${info.name}</h1>
-                <p><b>Categoría</b>: ${info.category}</p>
-                <p><b>Dirección</b>: ${info.address}</p>
+                <h1>${g.name}</h1>
+                <p><b>Categoría</b>: ${g.category}</p>
+                <p><b>Dirección</b>: ${g.address}</p>
               `,
             });
             const marker = new google.maps.Marker({
-              position: info.position,
+              position: g.position,
               map: this.map,
               animation: google.maps.Animation.DROP,
-              icon: { url: info.icon },
+              icon: { url: g.icon },
             });
             marker.addListener('click', () => infowindow.open(this.map, marker));
             marker.setMap(this.map);
@@ -274,13 +274,16 @@ export class MapsComponent implements AfterViewInit {
     item.setMap(this.map);
   }
 
-  resumen(zone) {
+  info(zone) {
     this.http
-      .post('api/zone/resumen', zone)
+      .post('api/zone/info', { name: zone.name })
       .toPromise()
-      .then((data) => {
-        this.dialog.open(InfoComponent, { data }).afterClosed().toPromise();
-      })
+      .then((data) =>
+        this.dialog
+          .open(InfoComponent, { data: { name: zone.name, ...data } })
+          .afterClosed()
+          .toPromise()
+      )
       .catch((err) => this.snackBar.open('Error consultando ' + err));
   }
 

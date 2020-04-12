@@ -1,3 +1,5 @@
+@import "../node_modules/ag-grid-community/src/styles/ag-theme-alpine/sass/ag-theme-alpine-mixin.scss";
+
 body {
   margin: 0;
 }
@@ -10,4 +12,20 @@ body {
 body {
   margin: 0;
   font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+
+.ag-theme-alpine {
+  @include ag-theme-alpine();
+}
+
+.number {
+  text-align: right;
+
+  .ag-header-cell-label {
+    justify-content: flex-end;
+  }
+}
+
+.mat-dialog-actions {
+  justify-content: flex-end;
 }
