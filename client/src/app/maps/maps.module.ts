@@ -17,6 +17,7 @@ import { SelectComponent } from './select/select.component';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
+import { AgGridModule } from 'ag-grid-angular';
 
 @NgModule({
   declarations: [MapsComponent, SelectComponent, InfoComponent],
@@ -35,7 +36,8 @@ import { MatSelectModule } from '@angular/material/select';
     MatFabMenuModule,
     MatDialogModule,
     MatFormFieldModule,
-    MatSelectModule
-  ]
+    MatSelectModule,
+    AgGridModule.withComponents([]),
+  ],
 })
 export class MapsModule {}
