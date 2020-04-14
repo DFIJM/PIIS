@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "PIIS": {
+    "piis": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -17,7 +17,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
-            "outputPath": "dist/PIIS",
+            "outputPath": "dist",
             "index": "src/index.html",
             "main": "src/main.ts",
             "polyfills": "src/polyfills.ts",
@@ -74,19 +74,19 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "PIIS:build",
+            "browserTarget": "piis:build",
             "proxyConfig": "proxy.conf.json"
           },
           "configurations": {
             "production": {
-              "browserTarget": "PIIS:build:production"
+              "browserTarget": "piis:build:production"
             }
           }
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "PIIS:build"
+            "browserTarget": "piis:build"
           }
         },
         "test": {
@@ -124,16 +124,16 @@
           "builder": "@angular-devkit/build-angular:protractor",
           "options": {
             "protractorConfig": "e2e/protractor.conf.js",
-            "devServerTarget": "PIIS:serve"
+            "devServerTarget": "piis:serve"
           },
           "configurations": {
             "production": {
-              "devServerTarget": "PIIS:serve:production"
+              "devServerTarget": "piis:serve:production"
             }
           }
         }
       }
     }
   },
-  "defaultProject": "PIIS"
+  "defaultProject": "piis"
 }
