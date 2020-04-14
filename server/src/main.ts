@@ -9,14 +9,14 @@ async function bootstrap() {
     process.env.NODE_ENV === 'prod'
       ? {
           httpsOptions: {
-            key: readFileSync('./ssl/private-key.pem'),
-            cert: readFileSync('./ssl/public-certificate.pem')
+            key: readFileSync('./ssl/private-key.key'),
+            cert: readFileSync('./ssl/public-certificate.crt')
           }
         }
       : {}
   );
   app.setGlobalPrefix('api');
   app.use(morgan(process.env.NODE_ENV === 'prod' ? 'common' : 'dev'));
-  await app.listen(8080, () => console.info('Servidor escuchando en el puerto 8080'));
+  await app.listen(443, () => console.info('Servidor HTTPS arrancado'));
 }
 bootstrap();
