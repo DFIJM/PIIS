@@ -17,6 +17,6 @@ async function bootstrap() {
   );
   app.setGlobalPrefix('api');
   app.use(morgan(process.env.NODE_ENV === 'prod' ? 'common' : 'dev'));
-  await app.listen(443, () => console.info('Servidor HTTPS arrancado'));
+  await app.listen(8082, () => console.info('Servidor HTTPS arrancado'));
 }
 bootstrap();
