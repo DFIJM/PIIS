@@ -10,4 +10,5 @@ mv build/* .
 rm -rf build
 nvm use 12.16.1
 NODE_ENV=prod pm2 start main.js --name piis --max-memory-restart 200M --time
+pm2 save
 exit
