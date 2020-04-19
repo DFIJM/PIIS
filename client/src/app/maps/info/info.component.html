@@ -1,16 +1,22 @@
-<h1 mat-dialog-title>Resumen de {{data.name}}</h1>
-<div mat-dialog-content>
-  <div fxLayout="row">
+<!-- TEMPLATE INFO -->
+<ng-template #info
+             let-zone="zone">
+  <div fxLayout="row"
+       style="margin-bottom: 10px; align-items: center; justify-content: center;">
     <div fxFlex="200px"
          fxShrink="0">
       <table>
         <tr>
+          <td>Km<sup>2</sup>:</td>
+          <td class="number">{{zone.km2 | number: '1.0-0'}}</td>
+        </tr>
+        <tr>
           <td>Tipos de negocios:</td>
-          <td class="number">{{data.business.categories.length | number}}</td>
+          <td class="number">{{zone.business.categories.length | number: '1.0-0'}}</td>
         </tr>
         <tr>
           <td>Número de negocios:</td>
-          <td class="number">{{data.business.count | number}}</td>
+          <td class="number">{{zone.business.count | number: '1.0-0'}}</td>
         </tr>
       </table>
     </div>
@@ -18,19 +24,72 @@
          fxGrow="1"
          fxShrink="0"
          class="twitter">
-      <img src="assets/twitter.png" />
-      Tweets recogidos: <span class="number">{{data.twitter.count | number}}</span>
+      <div fxLayout="row">
+        <div fxFlex="30px"
+             style="align-items: center; justify-content: center; display: flex;">
+          <img src="assets/twitter.png" />
+        </div>
+        <div fxFlex>
+          <table>
+            <tr>
+              <td>Tweets recogidos:</td>
+              <td class="number">{{zone.twitter.tweets | number}}</td>
+            </tr>
+            <tr>
+              <td>Usuarios:</td>
+              <td class="number">{{(zone.twitter.users || 0) | number}}</td>
+            </tr>
+          </table>
+        </div>
+      </div>
     </div>
   </div>
+
+  <h2>Top usuarios Twitter</h2>
+  <ag-grid-angular style="width: 500px; height: 260.6px;"
+                   class="ag-theme-alpine"
+                   [rowData]="zone.twitter.topUsers"
+                   [columnDefs]="columnsTwiter"
+                   [frameworkComponents]="frameworkComponents"
+                   [suppressNoRowsOverlay]="true">
+  </ag-grid-angular>
+
+  <h2 style="margin-top: 10px;">Ranking de negocios</h2>
   <ag-grid-angular style="width: 500px; height: 500px;"
                    class="ag-theme-alpine"
-                   [rowData]="data.business.categories"
-                   [columnDefs]="columnDefs"
-                   [frameworkComponents]="frameworkComponents">
+                   [rowData]="zone.business.categories"
+                   [columnDefs]="columnsBusiness"
+                   [frameworkComponents]="frameworkComponents"
+                   [suppressNoRowsOverlay]="true">
   </ag-grid-angular>
+</ng-template>
+
+<h1 mat-dialog-title>{{isComparative ? 'Comparativa: ' + data.zone1 + ' / ' + data.zone2 : data.zone1}}</h1>
+<div mat-dialog-content>
+  <div *ngIf="isComparative && zone1 && zone2">
+    <div fxLayout="row">
+      <div fxFlex="50"
+           style="padding-right: 7px; border-right: 1px dashed #bbbbbb;">
+        <ng-container *ngTemplateOutlet="info; context: {zone: zone1}"></ng-container>
+      </div>
+      <div fxFlex="50"
+           style="margin-left: 5px;">
+        <ng-container *ngTemplateOutlet="info; context: {zone: zone2}"></ng-container>
+      </div>
+    </div>
+  </div>
+  <div *ngIf="!isComparative && zone1">
+    <ng-container *ngTemplateOutlet="info; context: {zone: zone1}"></ng-container>
+  </div>
 </div>
 <div mat-dialog-actions
      style="text-align: right;">
+  <button *ngIf="isComparative && zone1 && zone2"
+          (click)="save()"
+          mat-raised-button
+          color="primary">
+    Guardar
+  </button>
   <button mat-button
           [mat-dialog-close]>
     Cerrar

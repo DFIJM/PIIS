@@ -43,7 +43,7 @@
       </button>
       <button fxFlex="40px"
               mat-icon-button
-              (click)="playOrStop(zone)"
+              (click)="playOrStop(zone, $event)"
               [matTooltip]="zone.playing ? 'Parar recogida de datos: Twitter' : 'Reanudar recogida de datos: Twitter'">
         <mat-icon>{{zone.playing ? 'stop' : 'play_arrow'}}</mat-icon>
       </button>
@@ -71,7 +71,7 @@
              fxGrow="0"
              fxShrink="1"
              class="badge">
-          {{category.count | number}}
+          {{category.count | number: '1.0-0'}}
         </div>
       </mat-list-item>
     </mat-list>
