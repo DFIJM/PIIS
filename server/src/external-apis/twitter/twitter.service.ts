@@ -62,7 +62,7 @@ export class TwitterService {
   }
 
   async info(name: string): Promise<any> {
-    return { count: await this.tweetModel.count({ zone: name }).exec() };
+    return { count: await this.tweetModel.countDocuments({ zone: name }).exec() };
   }
 
   async remove(name: string): Promise<any> {
