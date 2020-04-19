@@ -65,6 +65,10 @@ export class TwitterService {
     return { count: await this.tweetModel.count({ zone: name }).exec() };
   }
 
+  async remove(name: string): Promise<any> {
+    return this.tweetModel.deleteMany({ zone: name }).exec();
+  }
+
   private createStreaming(name, bounds) {
     this.streamingsPlaying[name] = this.TWITTER.stream('statuses/filter', { locations: this.boundsToLocation(bounds) });
     this.streamingsPlaying[name].on('tweet', tweet => {

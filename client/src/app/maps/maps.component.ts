@@ -5,6 +5,8 @@ import { MatSelectionList } from '@angular/material/list';
 import { SelectComponent } from './select/select.component';
 import { MatDialog } from '@angular/material/dialog';
 import { InfoComponent } from './info/info.component';
+import { MatBottomSheet } from '@angular/material/bottom-sheet';
+import { ZoneActionsComponent } from './zone-actions/zone-actions.component';
 
 @Component({
   selector: 'piis-maps',
@@ -12,7 +14,12 @@ import { InfoComponent } from './info/info.component';
   styleUrls: ['./maps.component.scss'],
 })
 export class MapsComponent implements AfterViewInit {
-  constructor(private http: HttpClient, private snackBar: MatSnackBar, private dialog: MatDialog) {}
+  constructor(
+    private http: HttpClient,
+    private snackBar: MatSnackBar,
+    private dialog: MatDialog,
+    private bottomSheet: MatBottomSheet
+  ) {}
 
   apis = [
     {
@@ -274,7 +281,8 @@ export class MapsComponent implements AfterViewInit {
     item.setMap(this.map);
   }
 
-  info(zone) {
+  info(zone, event) {
+    event.stopPropagation();
     this.http
       .post('api/zone/info', { name: zone.name })
       .toPromise()
@@ -325,4 +333,16 @@ export class MapsComponent implements AfterViewInit {
   }
 
   compare() {}
+
+  async zoneActions(zone: any) {
+    let result: string = await this.bottomSheet.open(ZoneActionsComponent).afterDismissed().toPromise();
+    let actions = {
+      remove: async () => {
+        await this.http.post('api/zone/remove', { name: zone.name }).toPromise();
+        window.location.reload();
+      },
+    };
+
+    actions[result]();
+  }
 }
