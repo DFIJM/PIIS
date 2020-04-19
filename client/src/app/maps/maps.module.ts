@@ -18,9 +18,11 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { AgGridModule } from 'ag-grid-angular';
+import { MatBottomSheetModule } from '@angular/material/bottom-sheet';
+import { ZoneActionsComponent } from './zone-actions/zone-actions.component';
 
 @NgModule({
-  declarations: [MapsComponent, SelectComponent, InfoComponent],
+  declarations: [MapsComponent, SelectComponent, InfoComponent, ZoneActionsComponent],
   imports: [
     CommonModule,
     BrowserModule,
@@ -37,6 +39,7 @@ import { AgGridModule } from 'ag-grid-angular';
     MatDialogModule,
     MatFormFieldModule,
     MatSelectModule,
+    MatBottomSheetModule,
     AgGridModule.withComponents([]),
   ],
 })

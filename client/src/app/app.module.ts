@@ -8,11 +8,10 @@ import { AppInitializer } from './app.initializer';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MAT_SNACK_BAR_DEFAULT_OPTIONS } from '@angular/material/snack-bar';
-import { MatFabMenuModule } from '@angular-material-extensions/fab-menu';
 
 @NgModule({
   declarations: [AppComponent],
-  imports: [BrowserModule, AppRoutingModule, FlexLayoutModule, MapsModule, BrowserAnimationsModule, MatFabMenuModule],
+  imports: [BrowserModule, AppRoutingModule, FlexLayoutModule, MapsModule, BrowserAnimationsModule],
   providers: [
     AppInitializer,
     { provide: LOCALE_ID, useValue: 'es-ES' },
@@ -21,16 +20,16 @@ import { MatFabMenuModule } from '@angular-material-extensions/fab-menu';
       useValue: {
         duration: 2500,
         horizontalPosition: 'right',
-        verticalPosition: 'bottom'
-      }
+        verticalPosition: 'bottom',
+      },
     },
     {
       provide: APP_INITIALIZER,
       useFactory: (initializer: AppInitializer) => () => initializer.load(),
       deps: [AppInitializer],
-      multi: true
-    }
+      multi: true,
+    },
   ],
-  bootstrap: [AppComponent]
+  bootstrap: [AppComponent],
 })
 export class AppModule {}

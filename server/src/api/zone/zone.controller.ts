@@ -67,6 +67,15 @@ export class ZoneController {
     }
   }
 
+  @Post('remove')
+  async remove(@Body() { name }) {
+    try {
+      await this.twitter.stop(name);
+    } catch (err) {} // Nos da igual si da error o no existe
+    await this.twitter.remove(name);
+    await this.zoneModel.deleteOne({ name }).exec();
+  }
+
   @Post('twitter/play')
   twitterPlay(@Body() { name }) {
     return this.twitter.play(name);

@@ -32,11 +32,12 @@
   </mat-list>
   <mat-nav-list class="zone-list">
     <mat-list-item *ngFor="let zone of zones"
-                   class="zone">
+                   class="zone"
+                   (click)="zoneActions(zone)">
       <div fxFlex>{{zone.name}}</div>
       <button fxFlex="40px"
               mat-icon-button
-              (click)="info(zone)"
+              (click)="info(zone, $event)"
               [matTooltip]="'Resumen informativo'">
         <mat-icon>info</mat-icon>
       </button>
