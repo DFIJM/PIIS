@@ -336,13 +336,17 @@ export class MapsComponent implements AfterViewInit {
 
   async zoneActions(zone: any) {
     let result: string = await this.bottomSheet.open(ZoneActionsComponent).afterDismissed().toPromise();
-    let actions = {
-      remove: async () => {
-        await this.http.post('api/zone/remove', { name: zone.name }).toPromise();
-        window.location.reload();
-      },
-    };
+    if (result) {
+      let actions = {
+        remove: async () => {
+          await this.http.post('api/zone/remove', { name: zone.name }).toPromise();
+          window.location.reload();
+        },
+      };
 
-    actions[result]();
+      if (actions[result]) {
+        actions[result]();
+      }
+    }
   }
 }
