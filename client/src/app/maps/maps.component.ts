@@ -65,14 +65,18 @@ export class MapsComponent implements AfterViewInit {
   }
 
   apiChange(selection) {
-    for (let api of this.apis) {
-      if (!selection.option.value) {
-        this.changeDrawer();
-      } else if (api.name === selection.option.value) {
-        if (api.type.toUpperCase() !== this.drawingManager.getDrawingMode()?.toUpperCase()) {
-          this.changeDrawer(api.type.toUpperCase());
-          this.selectedApis = [api.name];
-          break;
+    if (!this.selectedApis.length) {
+      this.changeDrawer();
+    } else {
+      for (let api of this.apis) {
+        if (!selection.option.value) {
+          this.changeDrawer();
+        } else if (api.name === selection.option.value) {
+          if (api.type.toUpperCase() !== this.drawingManager.getDrawingMode()?.toUpperCase()) {
+            this.changeDrawer(api.type.toUpperCase());
+            this.selectedApis = [api.name];
+            break;
+          }
         }
       }
     }
