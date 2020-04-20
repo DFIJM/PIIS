@@ -39,6 +39,11 @@ export class MapsComponent implements AfterViewInit {
     },
   ];
 
+  actionButtons = [
+    { id: 1, icon: 'history', tooltip: 'Histórico', tooltipPosition: 'left' },
+    { id: 2, icon: 'compare', tooltip: 'Comparativa', tooltipPosition: 'left' },
+  ];
+
   categoriesZone: string;
   categories: any[] = [];
 
