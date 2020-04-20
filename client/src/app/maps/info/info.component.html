@@ -10,20 +10,21 @@
           <td>Km<sup>2</sup>:</td>
           <td class="number">{{zone.km2 | number: '1.0-0'}}</td>
         </tr>
-        <tr>
+        <tr *ngIf="zone.business?.categories?.length">
           <td>Tipos de negocios:</td>
-          <td class="number">{{zone.business.categories.length | number: '1.0-0'}}</td>
+          <td class="number">{{zone.business?.categories?.length | number: '1.0-0'}}</td>
         </tr>
-        <tr>
+        <tr *ngIf="zone.business?.count">
           <td>Número de negocios:</td>
-          <td class="number">{{zone.business.count | number: '1.0-0'}}</td>
+          <td class="number">{{zone.business?.count | number: '1.0-0'}}</td>
         </tr>
       </table>
     </div>
     <div fxFlex="200px"
          fxGrow="1"
          fxShrink="0"
-         class="twitter">
+         class="twitter"
+         *ngIf="zone.twitter?.tweets && zone.twitter?.users">
       <div fxLayout="row">
         <div fxFlex="30px"
              style="align-items: center; justify-content: center; display: flex;">
@@ -33,11 +34,11 @@
           <table>
             <tr>
               <td>Tweets recogidos:</td>
-              <td class="number">{{zone.twitter.tweets | number}}</td>
+              <td class="number">{{zone.twitter?.tweets | number}}</td>
             </tr>
             <tr>
               <td>Usuarios:</td>
-              <td class="number">{{(zone.twitter.users || 0) | number}}</td>
+              <td class="number">{{(zone.twitter?.users || 0) | number}}</td>
             </tr>
           </table>
         </div>
@@ -45,22 +46,27 @@
     </div>
   </div>
 
-  <h2>Top usuarios Twitter</h2>
-  <ag-grid-angular style="width: 500px; height: 260.6px;"
+  <h2 *ngIf="zone.twitter?.topUsers?.length">Top usuarios Twitter</h2>
+  <ag-grid-angular *ngIf="zone.twitter?.topUsers?.length"
+                   style="width: 500px; height: 260.6px;"
                    class="ag-theme-alpine"
                    [rowData]="zone.twitter.topUsers"
                    [columnDefs]="columnsTwiter"
                    [frameworkComponents]="frameworkComponents"
-                   [suppressNoRowsOverlay]="true">
+                   [suppressNoRowsOverlay]="true"
+                   [suppressLoadingOverlay]="true">
   </ag-grid-angular>
 
-  <h2 style="margin-top: 10px;">Ranking de negocios</h2>
-  <ag-grid-angular style="width: 500px; height: 500px;"
+  <h2 *ngIf="zone.business?.categories?.length"
+      style="margin-top: 10px;">Ranking de negocios</h2>
+  <ag-grid-angular *ngIf="zone.business?.categories?.length"
+                   style="width: 500px; height: 500px;"
                    class="ag-theme-alpine"
                    [rowData]="zone.business.categories"
                    [columnDefs]="columnsBusiness"
                    [frameworkComponents]="frameworkComponents"
-                   [suppressNoRowsOverlay]="true">
+                   [suppressNoRowsOverlay]="true"
+                   [suppressLoadingOverlay]="true">
   </ag-grid-angular>
 </ng-template>
 
