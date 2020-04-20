@@ -62,7 +62,26 @@ export class TwitterService {
   }
 
   async info(name: string): Promise<any> {
-    return { count: await this.tweetModel.countDocuments({ zone: name }).exec() };
+    return {
+      tweets: await this.tweetModel.countDocuments({ zone: name }).exec(),
+      topUsers: await this.tweetModel
+        .aggregate([
+          { $match: { zone: name } },
+          { $unwind: '$user' },
+          { $group: { _id: '$user.id', name: { $first: '$user.screen_name' }, count: { $sum: 1 } } },
+          { $sort: { count: -1 } },
+          { $limit: 5 }
+        ])
+        .exec(),
+      users: (await this.tweetModel
+        .aggregate([
+          { $match: { zone: name } },
+          { $unwind: '$user' },
+          { $group: { _id: '$user.id' } },
+          { $group: { _id: null, count: { $sum: 1 } } }
+        ])
+        .exec())[0]?.count
+    };
   }
 
   async remove(name: string): Promise<any> {

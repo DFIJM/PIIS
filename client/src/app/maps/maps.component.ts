@@ -291,20 +291,19 @@ export class MapsComponent implements AfterViewInit {
   }
 
   info(zone, event) {
-    event.stopPropagation();
-    this.http
-      .post('api/zone/info', { name: zone.name })
-      .toPromise()
-      .then((data) =>
-        this.dialog
-          .open(InfoComponent, { data: { name: zone.name, ...data } })
-          .afterClosed()
-          .toPromise()
-      )
-      .catch((err) => this.snackBar.open('Error consultando ' + err));
+    if (event) {
+      event.stopPropagation();
+    }
+    this.dialog
+      .open(InfoComponent, { data: { zone1: zone.name } })
+      .afterClosed()
+      .toPromise();
   }
 
-  playOrStop(zone) {
+  playOrStop(zone, event) {
+    if (event) {
+      event.stopPropagation();
+    }
     if (zone.playing) {
       this.http
         .post('api/zone/twitter/stop', { name: zone.name })
@@ -330,18 +329,18 @@ export class MapsComponent implements AfterViewInit {
     $event === 1 ? this.history() : this.compare();
   }
 
-  async history() {
+  async compare() {
     let selectedZones = await this.dialog
       .open(SelectComponent, { data: { zones: this.zones } })
       .afterClosed()
       .toPromise();
 
     if (selectedZones) {
-      await this.dialog.open(InfoComponent, { data: { selectedZones } }).afterClosed().toPromise();
+      this.dialog.open(InfoComponent, { data: selectedZones }).afterClosed().toPromise();
     }
   }
 
-  compare() {}
+  history() {}
 
   async zoneActions(zone: any) {
     let result: string = await this.bottomSheet.open(ZoneActionsComponent).afterDismissed().toPromise();

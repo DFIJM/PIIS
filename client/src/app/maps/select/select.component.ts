@@ -4,8 +4,11 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 @Component({
   selector: 'piis-select',
   templateUrl: './select.component.html',
-  styleUrls: ['./select.component.scss']
+  styleUrls: ['./select.component.scss'],
 })
 export class SelectComponent {
   constructor(public dialogRef: MatDialogRef<SelectComponent>, @Inject(MAT_DIALOG_DATA) public data: any) {}
+
+  selectedZone1;
+  selectedZone2;
 }

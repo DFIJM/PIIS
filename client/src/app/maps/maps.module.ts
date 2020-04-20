@@ -20,9 +20,10 @@ import { MatSelectModule } from '@angular/material/select';
 import { AgGridModule } from 'ag-grid-angular';
 import { MatBottomSheetModule } from '@angular/material/bottom-sheet';
 import { ZoneActionsComponent } from './zone-actions/zone-actions.component';
+import { ExcludePipe } from './select/exclude.pipe';
 
 @NgModule({
-  declarations: [MapsComponent, SelectComponent, InfoComponent, ZoneActionsComponent],
+  declarations: [MapsComponent, SelectComponent, InfoComponent, ZoneActionsComponent, ExcludePipe],
   imports: [
     CommonModule,
     BrowserModule,

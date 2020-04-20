@@ -7,9 +7,7 @@ import { MatBottomSheetRef } from '@angular/material/bottom-sheet';
   styleUrls: ['./zone-actions.component.scss'],
 })
 export class ZoneActionsComponent {
-  constructor(private _bottomSheetRef: MatBottomSheetRef<ZoneActionsComponent>) {
-    console.log(this._bottomSheetRef);
-  }
+  constructor(private _bottomSheetRef: MatBottomSheetRef<ZoneActionsComponent>) {}
 
   actions = [
     {

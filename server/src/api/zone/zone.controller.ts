@@ -1,10 +1,11 @@
 import { Controller, Post, Body, InternalServerErrorException } from '@nestjs/common';
-import { Zone } from './zone';
+import { Zone, RectangleOptions } from './zone';
 import { FoursquareService } from '../../external-apis/foursquare/foursquare.service';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { TwitterService } from '../../external-apis/twitter/twitter.service';
 import { OpenStreetMapService } from '../../external-apis/openstreetmap/openstreetmap.service';
+import { getAreaOfPolygon, convertArea } from 'geolib';
 
 @Controller('zone')
 export class ZoneController {
@@ -93,6 +94,25 @@ export class ZoneController {
 
   @Post('info')
   async info(@Body() { name }) {
-    return { business: await this.foursquare.info(name), twitter: await this.twitter.info(name) };
+    let data = {
+      business: await this.foursquare.info(name),
+      twitter: await this.twitter.info(name),
+      zone: await this.zoneModel.findOne({ name }),
+      km2: null
+    };
+
+    // Calculamos km2
+    let rectangle;
+    for (let drawing of data.zone.drawings) {
+      if (drawing.type === 'RECTANGLE') {
+        rectangle = (<RectangleOptions>drawing.options).bounds;
+        break;
+      }
+    }
+    if (rectangle) {
+      data.km2 = convertArea(getAreaOfPolygon(rectangle.map(coord => [coord.lat, coord.lng])), 'km2');
+    }
+
+    return data;
   }
 }

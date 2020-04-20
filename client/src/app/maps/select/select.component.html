@@ -3,7 +3,8 @@
   <div>
     <mat-form-field>
       <mat-select placeholder="Zona 1"
-                  [(ngModel)]="data.zone1"
+                  [(ngModel)]="selectedZone1"
+                  (selectionChange)="selectedZone2 = null"
                   cdkFocusInitial>
         <mat-option *ngFor="let zone of data.zones"
                     [value]="zone.name">
@@ -15,8 +16,9 @@
   <div>
     <mat-form-field>
       <mat-select placeholder="Zona 2"
-                  [(ngModel)]="data.zone2">
-        <mat-option *ngFor="let zone of data.zones"
+                  [(ngModel)]="selectedZone2"
+                  [disabled]="!selectedZone1">
+        <mat-option *ngFor="let zone of data.zones | exclude: selectedZone1"
                     [value]="zone.name">
           {{zone.name}}
         </mat-option>
@@ -31,8 +33,8 @@
     Cancelar
   </button>
   <button mat-button
-          [mat-dialog-close]=" {zone1: {}, zone2: {}}">
-    <!-- data -->
+          [disabled]="!selectedZone1 || !selectedZone2"
+          [mat-dialog-close]="{zone1: selectedZone1, zone2: selectedZone2}">
     Aceptar
   </button>
 </div>
