@@ -19,4 +19,8 @@
 
 table {
   border: none;
+
+  tr > td {
+    vertical-align: bottom;
+  }
 }
