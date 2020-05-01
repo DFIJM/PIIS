@@ -56,8 +56,15 @@ export class InfoComponent implements OnInit {
   }
 
   async save() {
-    // await this.http.post('api/zone/save-comparative', { zone: this.zone1, zone2: this.zone2 }).toPromise();
-    this.dialogRef.close();
+    let name = prompt('Introduzca un nombre para la comparativa');
+    if (name) {
+      try {
+        await this.http.post('api/comparative/save', { name, zone1: this.zone1, zone2: this.zone2 }).toPromise();
+        this.dialogRef.close();
+      } catch (err) {
+        alert('Ese nombre ya existe');
+      }
+    }
   }
 
   private numberFormatter() {

@@ -69,17 +69,21 @@
                    [suppressLoadingOverlay]="true">
   </ag-grid-angular>
 </ng-template>
-
-<h1 mat-dialog-title>{{isComparative ? 'Comparativa: ' + data.zone1 + ' / ' + data.zone2 : data.zone1}}</h1>
+<h1 mat-dialog-title
+    *ngIf="isComparative">Comparativa</h1>
+<h1 mat-dialog-title
+    *ngIf="!isComparative">{{data.zone1}}</h1>
 <div mat-dialog-content>
   <div *ngIf="isComparative && zone1 && zone2">
     <div fxLayout="row">
       <div fxFlex="50"
            style="padding-right: 7px; border-right: 1px dashed #bbbbbb;">
+        <h1>{{data.zone1}}</h1>
         <ng-container *ngTemplateOutlet="info; context: {zone: zone1}"></ng-container>
       </div>
       <div fxFlex="50"
            style="margin-left: 5px;">
+        <h1>{{data.zone2}}</h1>
         <ng-container *ngTemplateOutlet="info; context: {zone: zone2}"></ng-container>
       </div>
     </div>

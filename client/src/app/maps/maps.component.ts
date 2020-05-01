@@ -2,11 +2,12 @@ import { Component, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatSelectionList } from '@angular/material/list';
-import { SelectComponent } from './select/select.component';
+import { SelectZoneComponent } from './select-zone/select-zone.component';
 import { MatDialog } from '@angular/material/dialog';
 import { InfoComponent } from './info/info.component';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
 import { ZoneActionsComponent } from './zone-actions/zone-actions.component';
+import { SelectComparativeComponent } from './select-comparative/select-comparative.component';
 
 @Component({
   selector: 'piis-maps',
@@ -331,16 +332,29 @@ export class MapsComponent implements AfterViewInit {
 
   async compare() {
     let selectedZones = await this.dialog
-      .open(SelectComponent, { data: { zones: this.zones } })
+      .open(SelectZoneComponent, { data: { zones: this.zones } })
       .afterClosed()
       .toPromise();
 
     if (selectedZones) {
+      console.log(selectedZones);
       this.dialog.open(InfoComponent, { data: selectedZones }).afterClosed().toPromise();
     }
   }
 
-  history() {}
+  async history() {
+    let selectedComparative = await this.dialog
+      .open(SelectComparativeComponent, {
+        data: { comparatives: await this.http.post('api/comparative/get', {}).toPromise() },
+      })
+      .afterClosed()
+      .toPromise();
+
+    if (selectedComparative) {
+      console.log(selectedComparative);
+      this.dialog.open(InfoComponent, { data: selectedComparative }).afterClosed().toPromise();
+    }
+  }
 
   async zoneActions(zone: any) {
     let result: string = await this.bottomSheet.open(ZoneActionsComponent).afterDismissed().toPromise();

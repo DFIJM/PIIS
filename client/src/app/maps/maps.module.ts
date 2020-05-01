@@ -13,17 +13,25 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatFabMenuModule } from '@angular-material-extensions/fab-menu';
 import { InfoComponent } from './info/info.component';
-import { SelectComponent } from './select/select.component';
+import { SelectZoneComponent } from './select-zone/select-zone.component';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { AgGridModule } from 'ag-grid-angular';
 import { MatBottomSheetModule } from '@angular/material/bottom-sheet';
 import { ZoneActionsComponent } from './zone-actions/zone-actions.component';
-import { ExcludePipe } from './select/exclude.pipe';
+import { ExcludePipe } from './select-zone/exclude.pipe';
+import { SelectComparativeComponent } from './select-comparative/select-comparative.component';
 
 @NgModule({
-  declarations: [MapsComponent, SelectComponent, InfoComponent, ZoneActionsComponent, ExcludePipe],
+  declarations: [
+    MapsComponent,
+    SelectZoneComponent,
+    SelectComparativeComponent,
+    InfoComponent,
+    ZoneActionsComponent,
+    ExcludePipe,
+  ],
   imports: [
     CommonModule,
     BrowserModule,
