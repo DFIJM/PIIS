@@ -1,0 +1,27 @@
+.item {
+  cursor: pointer;
+  padding: 5px;
+
+  &:not(:last-child) {
+    margin-bottom: 10px;
+  }
+
+  &.remove {
+    color: #850000;
+    background-color: #ffcccc;
+    border-color: #ffb8b8;
+    border-radius: 0.25rem;
+  }
+
+  .icon-wrapper {
+    align-items: center;
+    justify-content: center;
+    display: flex;
+  }
+
+  .text-wrapper {
+    .title {
+      font-weight: 500;
+    }
+  }
+}

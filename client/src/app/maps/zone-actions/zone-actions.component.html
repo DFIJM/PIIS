@@ -1,0 +1,17 @@
+<mat-nav-list>
+  <div *ngFor="let action of actions"
+       mat-list-item
+       (click)="choose(action.name)"
+       fxLayout="row"
+       class="item {{action.class || ''}}">
+    <div fxFlex="30px"
+         class="icon-wrapper">
+      <mat-icon class="icon">{{action.icon}}</mat-icon>
+    </div>
+    <div fxFlex
+         class="text-wrapper">
+      <div class="title">{{action.title}}</div>
+      <div class="description">{{action.description}}</div>
+    </div>
+  </div>
+</mat-nav-list>

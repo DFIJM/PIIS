@@ -1,0 +1,27 @@
+<h1 mat-dialog-title>Selección de comparativa</h1>
+<div mat-dialog-content>
+  <div>
+    <mat-form-field>
+      <mat-select placeholder="Comparativa"
+                  [(ngModel)]="selectedComparative"
+                  cdkFocusInitial>
+        <mat-option *ngFor="let comparative of data.comparatives"
+                    [value]="comparative">
+          {{comparative.name}}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+</div>
+<div mat-dialog-actions
+     style="text-align: right;">
+  <button mat-button
+          [mat-dialog-close]="null">
+    Cancelar
+  </button>
+  <button mat-button
+          *ngIf="selectedComparative"
+          [mat-dialog-close]="{zone1: selectedComparative.zone1.zone.name, zone2: selectedComparative.zone2.zone.name}">
+    Aceptar
+  </button>
+</div>

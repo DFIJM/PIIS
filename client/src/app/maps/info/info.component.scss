@@ -1,0 +1,26 @@
+.twitter {
+  color: #004085;
+  background-color: #cce5ff;
+  border-color: #b8daff;
+  border-radius: 0.25rem;
+  padding: 0.75rem 1.25rem;
+  max-height: 74px;
+
+  img {
+    width: 14px;
+    margin-right: 1px;
+    vertical-align: middle;
+  }
+}
+
+.number {
+  font-weight: 600;
+}
+
+table {
+  border: none;
+
+  tr > td {
+    vertical-align: bottom;
+  }
+}

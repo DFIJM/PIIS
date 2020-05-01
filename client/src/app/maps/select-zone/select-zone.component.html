@@ -1,0 +1,40 @@
+<h1 mat-dialog-title>Selección de zona</h1>
+<div mat-dialog-content>
+  <div>
+    <mat-form-field>
+      <mat-select placeholder="Zona 1"
+                  [(ngModel)]="selectedZone1"
+                  (selectionChange)="selectedZone2 = null"
+                  cdkFocusInitial>
+        <mat-option *ngFor="let zone of data.zones"
+                    [value]="zone.name">
+          {{zone.name}}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+  <div>
+    <mat-form-field>
+      <mat-select placeholder="Zona 2"
+                  [(ngModel)]="selectedZone2"
+                  [disabled]="!selectedZone1">
+        <mat-option *ngFor="let zone of data.zones | exclude: selectedZone1"
+                    [value]="zone.name">
+          {{zone.name}}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+</div>
+<div mat-dialog-actions
+     style="text-align: right;">
+  <button mat-button
+          [mat-dialog-close]="null">
+    Cancelar
+  </button>
+  <button mat-button
+          [disabled]="!selectedZone1 || !selectedZone2"
+          [mat-dialog-close]="{zone1: selectedZone1, zone2: selectedZone2}">
+    Aceptar
+  </button>
+</div>
