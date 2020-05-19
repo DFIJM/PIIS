@@ -7,6 +7,13 @@
   }
 }
 
+mat-progress-spinner {
+  position: fixed;
+  top: calc(50% - 50px);
+  left: calc(50% - 50px);
+  z-index: 1;
+}
+
 .title {
   font-size: 30px;
   font-weight: bold;

@@ -8,6 +8,7 @@ import { InfoComponent } from './info/info.component';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
 import { ZoneActionsComponent } from './zone-actions/zone-actions.component';
 import { SelectComparativeComponent } from './select-comparative/select-comparative.component';
+import { HttpService } from './http.service';
 
 @Component({
   selector: 'piis-maps',
@@ -19,7 +20,8 @@ export class MapsComponent implements AfterViewInit {
     private http: HttpClient,
     private snackBar: MatSnackBar,
     private dialog: MatDialog,
-    private bottomSheet: MatBottomSheet
+    private bottomSheet: MatBottomSheet,
+    public httpService: HttpService
   ) {}
 
   apis = [

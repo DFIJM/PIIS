@@ -2,7 +2,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MapsComponent } from './maps.component';
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { FlexModule } from '@angular/flex-layout';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -22,6 +22,9 @@ import { MatBottomSheetModule } from '@angular/material/bottom-sheet';
 import { ZoneActionsComponent } from './zone-actions/zone-actions.component';
 import { ExcludePipe } from './select-zone/exclude.pipe';
 import { SelectComparativeComponent } from './select-comparative/select-comparative.component';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { HttpService } from './http.service';
+import { HttpAppInterceptor } from './http.interceptor';
 
 @NgModule({
   declarations: [
@@ -50,6 +53,8 @@ import { SelectComparativeComponent } from './select-comparative/select-comparat
     MatSelectModule,
     MatBottomSheetModule,
     AgGridModule.withComponents([]),
+    MatProgressSpinnerModule,
   ],
+  providers: [HttpService, { provide: HTTP_INTERCEPTORS, useClass: HttpAppInterceptor, multi: true }],
 })
 export class MapsModule {}
