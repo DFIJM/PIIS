@@ -1,6 +1,7 @@
 <mat-progress-spinner [color]="'primary'"
                       [mode]="'indeterminate'"
-                      style="z-index: 9999;"></mat-progress-spinner>
+                      style="z-index: 9999;"
+                      *ngIf="httpService.loading | async"></mat-progress-spinner>
 
 <div class="base-layout"
      fxLayout="column">

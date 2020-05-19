@@ -1,5 +1,4 @@
 import { Component, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatSelectionList } from '@angular/material/list';
 import { SelectZoneComponent } from './select-zone/select-zone.component';
@@ -8,6 +7,7 @@ import { InfoComponent } from './info/info.component';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
 import { ZoneActionsComponent } from './zone-actions/zone-actions.component';
 import { SelectComparativeComponent } from './select-comparative/select-comparative.component';
+import { MapsService } from './maps.service';
 import { HttpService } from './http.service';
 
 @Component({
@@ -17,11 +17,11 @@ import { HttpService } from './http.service';
 })
 export class MapsComponent implements AfterViewInit {
   constructor(
-    private http: HttpClient,
+    public httpService: HttpService,
     private snackBar: MatSnackBar,
     private dialog: MatDialog,
     private bottomSheet: MatBottomSheet,
-    public httpService: HttpService
+    private service: MapsService
   ) {}
 
   apis = [
@@ -155,45 +155,39 @@ export class MapsComponent implements AfterViewInit {
 
   zoneListener(name, gmapsZone) {
     google.maps.event.addListener(gmapsZone, 'click', () => {
-      this.http
-        .post('api/zone/business', { name })
-        .toPromise()
-        .then(({ geo, categories }: any) => {
-          this.categoriesZone = name;
-          this.categories = categories;
-          for (const g of geo) {
-            const infowindow = new google.maps.InfoWindow({
-              content: `
+      this.service.zoneBusiness(name).then(({ geo, categories }: any) => {
+        this.categoriesZone = name;
+        this.categories = categories;
+        for (const g of geo) {
+          const infowindow = new google.maps.InfoWindow({
+            content: `
                 <h1>${g.name}</h1>
                 <p><b>Categoría</b>: ${g.category}</p>
                 <p><b>Dirección</b>: ${g.address}</p>
               `,
-            });
-            const marker = new google.maps.Marker({
-              position: g.position,
-              map: this.map,
-              animation: google.maps.Animation.DROP,
-              icon: { url: g.icon },
-            });
-            marker.addListener('click', () => infowindow.open(this.map, marker));
-            marker.setMap(this.map);
-          }
-        });
+          });
+          const marker = new google.maps.Marker({
+            position: g.position,
+            map: this.map,
+            animation: google.maps.Animation.DROP,
+            icon: { url: g.icon },
+          });
+          marker.addListener('click', () => infowindow.open(this.map, marker));
+          marker.setMap(this.map);
+        }
+      });
     });
   }
 
-  loadData() {
-    this.http
-      .post('api/zone/get', {})
-      .toPromise()
-      .then((zones: any[]) => {
-        this.zones = zones;
-        for (const zone of this.zones) {
-          for (const drawing of zone.drawings) {
-            this.draw(zone.name, drawing);
-          }
+  loadData(): Promise<void> {
+    return this.service.zones().then((zones: any[]) => {
+      this.zones = zones;
+      for (const zone of this.zones) {
+        for (const drawing of zone.drawings) {
+          this.draw(zone.name, drawing);
         }
-      });
+      }
+    });
   }
 
   drawingListener() {
@@ -214,9 +208,8 @@ export class MapsComponent implements AfterViewInit {
         if (!exists) {
           this.zones.push(zone);
         }
-        this.http
-          .post('api/zone/create', zone)
-          .toPromise()
+        this.service
+          .zoneCreate(zone)
           .then(() => {
             for (let _drawing of zone.drawings) {
               this.draw(name, _drawing);
@@ -308,18 +301,16 @@ export class MapsComponent implements AfterViewInit {
       event.stopPropagation();
     }
     if (zone.playing) {
-      this.http
-        .post('api/zone/twitter/stop', { name: zone.name })
-        .toPromise()
+      this.service
+        .stopTwitter(zone.name)
         .then(() => {
           this.snackBar.open('Recopilación detenida');
           zone.playing = false;
         })
         .catch((err) => this.snackBar.open('La detención ha fallado ' + err));
     } else {
-      this.http
-        .post('api/zone/twitter/play', { name: zone.name })
-        .toPromise()
+      this.service
+        .playTwitter(zone.name)
         .then(() => {
           this.snackBar.open('Recopilando información...');
           zone.playing = true;
@@ -339,7 +330,6 @@ export class MapsComponent implements AfterViewInit {
       .toPromise();
 
     if (selectedZones) {
-      console.log(selectedZones);
       this.dialog.open(InfoComponent, { data: selectedZones }).afterClosed().toPromise();
     }
   }
@@ -347,13 +337,12 @@ export class MapsComponent implements AfterViewInit {
   async history() {
     let selectedComparative = await this.dialog
       .open(SelectComparativeComponent, {
-        data: { comparatives: await this.http.post('api/comparative/get', {}).toPromise() },
+        data: { comparatives: await this.service.getComparatives() },
       })
       .afterClosed()
       .toPromise();
 
     if (selectedComparative) {
-      console.log(selectedComparative);
       this.dialog.open(InfoComponent, { data: selectedComparative }).afterClosed().toPromise();
     }
   }
@@ -363,7 +352,7 @@ export class MapsComponent implements AfterViewInit {
     if (result) {
       let actions = {
         remove: async () => {
-          await this.http.post('api/zone/remove', { name: zone.name }).toPromise();
+          await this.service.zoneRemove(zone.name);
           window.location.reload();
         },
       };
