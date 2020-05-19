@@ -25,6 +25,7 @@ import { SelectComparativeComponent } from './select-comparative/select-comparat
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { HttpService } from './http.service';
 import { HttpAppInterceptor } from './http.interceptor';
+import { MapsService } from './maps.service';
 
 @NgModule({
   declarations: [
@@ -55,6 +56,6 @@ import { HttpAppInterceptor } from './http.interceptor';
     AgGridModule.withComponents([]),
     MatProgressSpinnerModule,
   ],
-  providers: [HttpService, { provide: HTTP_INTERCEPTORS, useClass: HttpAppInterceptor, multi: true }],
+  providers: [HttpService, MapsService, { provide: HTTP_INTERCEPTORS, useClass: HttpAppInterceptor, multi: true }],
 })
 export class MapsModule {}

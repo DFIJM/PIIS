@@ -13,7 +13,6 @@ export class ComparativeController {
 
   @Post('save')
   save(@Body() data: any) {
-    console.log(data);
     return this.comparativeModel.create(data);
   }
 
